@@ -224,7 +224,6 @@ button{font-family:inherit;cursor:pointer}
       <div class="acts">
         <button class="btn pri lg full" id="btnStart" type="button">진단 시작하기 <span aria-hidden="true">→</span></button>
         <button class="btn ghost full" id="btnRestart" type="button" hidden>처음부터 다시 하기</button>
-        <button class="btn ghost full" id="btnDemo" type="button">예시로 채워 보기</button>
       </div>
       <p class="meta">25문항 · 한 문항에 「예」 또는 「아니오」만 누르면 돼요</p>
     </div>
@@ -616,7 +615,7 @@ function renderStart(){
 }
 $("btnStart").addEventListener("click",()=>{const k=firstOpen();if(k>=QS.length){demo=null;renderResult();show("result");focusHead();}else{cur=k;show("q");renderQ(0);}});
 $("btnRestart").addEventListener("click",()=>{mine={};save();cur=0;show("q");renderQ(0);});
-$("btnDemo").addEventListener("click",()=>{demo=JSON.parse(JSON.stringify(DEMO));renderResult();show("result");focusHead();});
+($("btnDemo")||{addEventListener(){}}).addEventListener("click",()=>{demo=JSON.parse(JSON.stringify(DEMO));renderResult();show("result");focusHead();});
 
 /* ── 질문 화면 ── */
 $("track").innerHTML=AREAS.map(a=>`<div class="seg" data-k="${a.k}"><div class="bar"><i></i></div><span class="nm">${a.n}</span></div>`).join("");
