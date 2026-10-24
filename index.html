@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
 <style>
-/* 레이아웃: 맨 위 결과 판(등급 도장 + 오각형 + 부족한 곳 + 지금 먼저 잡을 것) → 다섯 영역 체크 카드 → 등급 표 → 상담 */
+/* 두 화면. 체크 화면: 제목 → 다섯 영역 체크 카드 → 「진단 결과 보기」. 결과 화면: 등급 → 오각형·영역별 등급 → 벌어질 일·이유·먼저 잡을 것 → 등급 표 → 상담 → 체크 다시 하기 */
 :root{
   --bg:#f2f3ef;--card:#ffffff;--ink:#1a1a1a;--muted:#4a4a4a;--line:#c8ccc3;
   --accent:#0f5c48;--on-accent:#ffffff;--accent-soft:#e1efe9;--fill:rgba(15,92,72,.16);--ring:#dfe2da;
@@ -41,9 +41,28 @@ button:hover{border-color:var(--accent)}
 button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .demo{display:none;background:var(--accent-soft);border-radius:12px;padding:10px 14px;font-size:16px;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
 .demo.on{display:flex}
+.nonote{font-size:15px;font-weight:700;color:var(--muted);background:var(--ring);border-radius:8px;padding:6px 10px}
+label.q:has(input:disabled){cursor:default}
+button:disabled{opacity:.5;cursor:default}
 
 /* 결과 판 */
+.view[hidden]{display:none}
+.view{display:grid;gap:20px}
 .board{background:var(--card);border:1.5px solid var(--line);border-radius:18px;padding:20px;display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:24px;align-items:center}
+.head{background:var(--card);border:1.5px solid var(--line);border-radius:18px;padding:20px}
+.head:focus{outline:none}
+.rows{display:grid;gap:8px;min-width:0}
+.rw{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.rw:first-child{border-top:0}
+.rw .g{font-size:20px;min-width:40px}
+.rw b{font-size:17px;font-weight:800}
+.rw .cnt{font-weight:500;color:var(--muted);margin-left:6px}
+.rw p{grid-column:1/-1;margin:0;font-size:15px;color:var(--muted)}
+.three{display:grid;gap:12px}
+.again{display:flex;justify-content:flex-start}
+.finish{display:grid;gap:8px;justify-items:start}
+.finish button{min-height:52px;font-size:18px;padding:10px 28px}
+.finish .hint{font-size:15px;color:var(--muted)}
 .radar{width:100%;max-width:340px;height:auto;display:block;margin:0 auto}
 .radar text{font-family:var(--font)}
 .res{display:grid;gap:16px;min-width:0}
@@ -86,258 +105,351 @@ label.q input{width:22px;height:22px;margin:2px 0 0;accent-color:var(--accent)}
 .gr .n{font-size:15px;font-weight:700}
 .gr p{margin:0;font-size:16px}
 
-.cta{border-top:1.5px solid var(--line);padding:20px 4px 0;display:grid;gap:6px;justify-items:start;max-width:680px}
+.cta{border-top:1.5px solid var(--line);padding:20px 4px 0;display:grid;gap:6px;justify-items:start}
 .cta h2{font-size:21px;font-weight:800}
-.cta p{margin:0;font-size:17px;text-wrap:pretty}
+.cta p{margin:0;font-size:17px;text-wrap:pretty;max-width:680px}
 a.go{display:inline-flex;align-items:center;min-height:48px;margin-top:8px;background:var(--accent);color:var(--on-accent);font-weight:700;font-size:17px;text-decoration:none;border-radius:999px;padding:10px 24px}
 a.go:hover{filter:brightness(1.1)}
-.ctaTop{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 16px;background:var(--card);border:1.5px solid var(--accent);border-radius:16px;padding:12px 16px 16px}
-.ctaTop p{margin:4px 0 0;font-size:17px;font-weight:700;flex:1 1 280px;text-wrap:pretty}
 
 .gA{color:var(--gA)}.gB{color:var(--gB)}.gC{color:var(--gC)}.gF{color:var(--gF)}.gN{color:var(--muted)}
-@media (max-width:680px){.board{grid-template-columns:1fr;padding:16px;gap:16px}.stamp{width:76px;height:76px;font-size:40px}.big{font-size:21px}}
+@media (max-width:680px){.board{grid-template-columns:1fr;padding:16px;gap:16px}.head{padding:16px}.stamp{width:76px;height:76px;font-size:40px}.big{font-size:21px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
 
 <div class="wrap">
-  <header>
-    <h1>AI 업무 시스템 진단</h1>
-    <p class="sub">지금 실제로 그렇게 하고 있는 칸만 체크해요. 반쯤이면 체크하지 않아요.</p>
-  </header>
-
-  <div class="bar">
-    <button type="button" class="pri" id="btnDemo">예시로 채워 보기</button>
-    <button type="button" id="btnReset">모두 지우기</button>
-    <span class="note">체크한 내용은 이 브라우저에만 저장돼요.</span>
+  <!-- 화면 1: 체크 -->
+  <div class="view" id="vCheck">
+    <header>
+      <h1>AI 업무 시스템 진단</h1>
+      <p class="sub">지금 실제로 그렇게 하고 있는 칸만 체크해요. 반쯤이면 체크하지 않아요.</p>
+    </header>
+    <div class="demo" id="demoCheck" role="status">
+      <span><b>예시 회사 · 유아용품 브랜드(작은 팀)</b>의 체크예요. 예시를 보는 동안은 칸이 잠기고, 내 체크는 그대로 보관돼요.</span>
+      <button type="button" id="btnDemoOff">내 체크로 돌아가기</button>
+    </div>
+    <div class="bar">
+      <button type="button" id="btnDemo">예시로 채워 보기</button>
+      <button type="button" id="btnReset">모두 지우기</button>
+      <span class="note" id="saveNote">체크한 내용은 이 브라우저에만 저장돼요.</span>
+      <span class="note" id="undoBox" role="status" hidden>모두 지웠어요. <button type="button" id="btnUndo">되돌리기</button></span>
+    </div>
+    <div class="grid" id="areas"></div>
+    <div class="finish">
+      <button type="button" class="pri" id="btnShow">진단 결과 보기</button>
+      <span class="hint">다 못 채워도 괜찮아요. 체크한 만큼으로 결과가 나와요.</span>
+    </div>
   </div>
 
-  <div class="demo" id="demoBar" role="status">
-    <span><b>예시 A · 유아용품 브랜드(작은 팀)</b>를 보고 있어요. 예시에서는 체크가 바뀌지 않아요.</span>
-    <button type="button" id="btnMine">내 진단으로 돌아가기</button>
-  </div>
-
-  <section class="board" aria-live="polite" aria-label="진단 결과">
-    <svg class="radar" id="radar" viewBox="-50 -12 400 322" role="img" aria-label="다섯 영역 「예」 개수 오각형 그래프"></svg>
-    <div class="res">
+  <!-- 화면 2: 결과 -->
+  <div class="view" id="vResult" hidden>
+    <div class="demo" id="demoBar" role="status">
+      <span><b>예시 회사 · 유아용품 브랜드(작은 팀)</b> 결과예요.</span>
+      <button type="button" id="btnMine">내 진단으로 돌아가기</button>
+    </div>
+    <section class="head" id="rHead" tabindex="-1" aria-label="진단 결과">
       <div class="headline">
         <div class="stamp" id="cStamp">?</div>
         <div>
           <div class="lab">우리 회사 지금 단계</div>
-          <div class="big" id="cTitle">아직 체크 전이에요</div>
+          <div class="big" id="cTitle"></div>
         </div>
       </div>
+    </section>
+    <section class="board" aria-label="영역별 등급">
+      <svg class="radar" id="radar" viewBox="-50 -14 400 332" role="img" aria-label="다섯 영역 「예」 개수 오각형 그래프"></svg>
+      <div class="rows" id="rows"></div>
+    </section>
+    <div class="three">
       <div class="box">
         <h3>지금 회사에서 벌어지고 있을 일</h3>
-        <p id="cScene">아래 칸을 체크하면 결과가 여기에 떠요.</p>
+        <p id="cScene"></p>
       </div>
       <div class="box">
         <h3>왜 그런지</h3>
-        <p id="cWhy">목표 → 조직 → 표준 → 업무 중 어디가 막혔는지 보여 드려요.</p>
+        <p id="cWhy"></p>
       </div>
       <div class="box first">
-        <h3>지금 먼저 잡을 것</h3>
-        <div class="sys" id="cSys">체크하면 알려 드려요</div>
+        <h3 id="cLab">지금 먼저 잡을 것</h3>
+        <div class="sys" id="cSys"></div>
         <p id="cMsg"></p>
       </div>
     </div>
-  </section>
-
-  <div class="ctaTop">
-    <p id="ctaTop">체크가 어려우시면 상담에서 같이 채워 봐도 돼요.</p>
-    <a class="go" href="https://www.simplekey.kr/?utm_source=facam&amp;utm_medium=diagnosis_tool&amp;utm_campaign=lecture" target="_blank" rel="noopener">1:1 무료 상담 받아 보기</a>
+    <section class="sec" aria-labelledby="hGrade">
+      <h2 id="hGrade">등급은 「예」 개수로 정해요</h2>
+      <div class="gt" id="gradeTable"></div>
+    </section>
+    <section class="cta" aria-labelledby="hCta">
+      <h2 id="hCta">혼자 채우기 어렵다면</h2>
+      <p id="ctaFit"></p>
+      <p id="ctaLine">1:1 무료 상담에서 이 결과를 같이 보고 순서를 정해요.</p>
+      <a class="go" href="https://www.simplekey.kr/?utm_source=facam&amp;utm_medium=diagnosis_tool&amp;utm_campaign=lecture" target="_blank" rel="noopener">1:1 무료 상담 받아 보기</a>
+    </section>
+    <div class="again"><button type="button" id="btnAgain">체크 다시 하기</button></div>
   </div>
-
-  <div class="grid" id="areas"></div>
-
-  <section class="sec" aria-labelledby="hGrade">
-    <h2 id="hGrade">등급은 「예」 개수로 정해요</h2>
-    <div class="gt" id="gradeTable"></div>
-  </section>
-
-  <section class="cta" aria-labelledby="hCta">
-    <h2 id="hCta">혼자 채우기 어렵다면</h2>
-    <p id="ctaFit">체크를 마치면 우리 회사에 맞는 순서를 여기서 알려 드려요.</p>
-    <p>1:1 무료 상담에서 이 결과를 같이 보고 순서를 정해요.</p>
-    <a class="go" href="https://www.simplekey.kr/?utm_source=facam&amp;utm_medium=diagnosis_tool&amp;utm_campaign=lecture" target="_blank" rel="noopener">1:1 무료 상담 받아 보기</a>
-  </section>
 </div>
 
 <script>
 /* 문항 = 강의용 간소 진단서 그대로. 문항 줄의 세 번째 칸 = 괄호 풀이 */
 const AREAS=[
  {k:"goal",n:"목표",what:"회사 방향과 숫자가 실제 판단 기준인가",crit:"물었을 때 숫자가 바로 나와야 「예」",
-  diag:{F:"올해 목표랑 꼭 봐야 할 숫자가 아직 없거나, 대표님 머릿속에만 있어요.",C:"목표를 말로는 하실 수 있는데 담당·기한까지 적어 둔 문서가 없어서, 매번 대표님이 직접 설명하셔야 해요.",B:"목표와 숫자가 문서로 있고 회의에서 점검하고 있어요. 돌아보고 고치는 습관만 남았어요.",A:"목표를 정하고, 점검하고, 돌아보고 고치는 흐름이 돌아가요."},
   q:[["기초","올해 회사에서 가장 중요하게 만들고 싶은 결과를 분명히 말할 수 있다",""],
      ["기초","매출·문의처럼 꼭 봐야 할 핵심 숫자가 뭔지 안다",""],
      ["운영","이번 달 목표가 담당·기한과 함께 문서로 있다",""],
      ["운영","핵심 숫자를 정기 회의에서 점검하고 기록한다","정기 회의 = 매주·매달 날을 정해 두고 하는 회의"],
      ["고도화","목표를 이뤘는지 정기적으로 돌아보고 다음 목표·우선순위에 반영한다","우선순위 = 먼저 할 일의 순서"]]},
  {k:"org",n:"조직",what:"누가 뭘 맡고 어디까지 결정하나",crit:"대표만 알면 「아니오」, 직원이 문서를 보고 알 수 있어야 「예」",
-  diag:{F:"누가 무엇을 맡는지가 대표님 머릿속에만 있어요.",C:"누가 뭘 맡는지는 다들 아는데 적어 둔 게 없어서, 결국 판단은 다 대표님께 와요.",B:"역할과 결정 기준이 문서로 있어요. 기준대로 끝까지 맡기는 것만 남았어요.",A:"담당자가 정해진 기준대로 끝까지 처리하는 구조가 있어요."},
   q:[["기초","업무 영역을 나누고 각각 누가 맡는지 안다",""],
      ["기초","내가 직접 할 일과 넘길 일을 구분할 수 있다",""],
      ["운영","담당자와 책임 범위가 문서로 있다","책임 범위 = 어디까지 맡아서 끝내는지"],
      ["운영","직원이 어디까지 결정하고 어디서 대표 확인을 받는지 기준이 있다",""],
      ["고도화","담당자가 대표 확인 없이 기준대로 끝까지 처리한다",""]]},
  {k:"std",n:"표준",what:"반복 업무가 레시피로 있나",crit:"처음 온 사람이 보고 따라 할 수 있어야 「예」",
-  diag:{F:"반복하는 일이 사람 머릿속에만 있어서, 사람이 바뀌면 처음부터 다시 가르쳐야 해요.",C:"설명은 할 수 있는데 매뉴얼이 없어서, 새 사람이 오면 매번 처음부터 직접 가르치셔야 해요.",B:"매뉴얼대로 일이 돌아가요. 실수가 나면 매뉴얼까지 고치는 습관만 남았어요.",A:"실수가 나면 매뉴얼까지 바로 고쳐지고 있어요."},
   q:[["기초","반복하는 핵심 업무 목록이 있다",""],
      ["기초","업무마다 순서·담당·결과물을 말로 설명할 수 있다",""],
      ["운영","절차·체크리스트·예시가 든 매뉴얼이 있다","매뉴얼 = 일하는 순서를 적은 설명서, 체크리스트 = 빠뜨리지 않게 하나씩 확인하는 목록"],
      ["운영","실수·불만이 생겼을 때 처리 기준이 있다","처리 기준 = 그럴 때 누가 무엇을 하는지 정한 것"],
      ["고도화","실수가 생기면 돌아보고 매뉴얼에 바로 반영한다",""]]},
- {k:"work",n:"업무",what:"일·회의·파일이 한눈에 보이나",crit:"운영부터는 내가 안 물어봐도 누가 뭘 하는지 보여야 「예」(기초 1은 나 혼자 보는 목록이라도 한곳에 적혀 있으면 「예」)",
-  diag:{F:"진행 중인 일이 머릿속이랑 카톡에 흩어져 있어서, 빠지는 일이 자주 생겨요.",C:"일을 적어 두긴 하지만, 누가 언제까지 어디까지 했는지는 물어봐야 알아요.",B:"담당·마감·상태가 보이고 회의 결정도 남아요. 빠진 일을 정기적으로 걸러 내는 것만 남았어요.",A:"늦어지거나 빠진 일이 한눈에 보이고, 정기적으로 고쳐요."},
+ {k:"work",n:"업무",what:"일·회의·파일이 한눈에 보이나",crit:"운영부터는 내가 안 물어봐도 누가 뭘 하는지 보여야 「예」(진행 중인 일 칸은 나 혼자 보는 목록이라도 한곳에 적혀 있으면 「예」)",
   q:[["기초","진행 중인 일을 머릿속·카톡이 아니라 한곳에 적어 둔다",""],
      ["기초","회사 파일을 어디에 저장하는지 기본 위치가 정해져 있다",""],
      ["운영","업무마다 담당·마감·상태가 적혀 있다","상태 = 할 일·진행 중·끝 같은 진행 정도"],
      ["운영","회의 결정·담당·기한이 회의록에 남는다",""],
      ["고도화","늦어지거나 빠진 일이 한눈에 보이고, 정기적으로 점검해 고친다",""]]},
  {k:"ai",n:"AI",what:"AI에게 맡기고 관리하는 구조가 있나",crit:"한 번 쓰고 끝이면 「아니오」, 저장해서 다시 쓰면 「예」. 회사 단계 계산에서는 빼요",
-  diag:{F:"아직 AI를 일에 쓰지 않거나, 거의 쓰지 않아요.",C:"AI를 쓰긴 하지만 그때그때 한 번 쓰고 끝나는 편이에요.",B:"업무별 지시문을 저장해 다시 쓰고 있어요. 이제 AI 직원에게 반복 업무를 맡길 차례예요.",A:"역할이 정해진 AI 직원이 반복 업무를 맡아 해요."},
   q:[["기초","클로드·챗GPT 같은 AI를 일상 업무에 쓴다",""],
      ["기초","AI가 참고할 회사 자료·기준이 일부라도 정리돼 있다","기준 = 말투·가격·답변 원칙 같은 회사 규칙"],
      ["운영","업무별 AI 프로젝트·지시문을 저장해 다시 쓴다","AI 프로젝트·지시문 = AI에게 주는 업무 설명을 저장해 둔 것"],
      ["운영","맡길 때 목적·자료·결과물 기준을 같이 준다",""],
      ["고도화","역할과 맡은 범위가 정해진 AI 직원이 반복 업무를 맡아 한다","AI 직원 = 정해진 일을 맡아 하는 AI"]]}
 ];
-/* 등급별 해석(표에 쓰는 한 줄) */
+/* 등급 표 = 정본 뜻(F 머릿속 · C 말로는 되는데 문서 없음 · B 문서로 돌아감 · A 돌아보고 고침). B·C는 「보통」 뜻으로만 말해요 */
 const GRADES={
- A:{n:"「예」 5개",s:"정기적으로 점검하고 고치는 구조까지 있어요."},
- B:{n:"「예」 3~4개",s:"문서로 있고 돌아가요. 사람에게 넘기던 매뉴얼을 AI에게도 넘길 수 있어요."},
- C:{n:"「예」 1~2개",s:"말로는 설명이 되지만 문서가 없어서 대표님이 매번 직접 설명해요."},
- F:{n:"「예」 0개",s:"대표님 머릿속에만 있고 말로도 정리가 안 됐어요."}
+ A:{n:"「예」 5개",s:"돌아보고 고치는 구조까지 갖춘 단계예요."},
+ B:{n:"「예」 3~4개",s:"보통 문서로 일이 돌아가기 시작한 단계예요."},
+ C:{n:"「예」 1~2개",s:"보통 말로는 되지만 아직 문서로 굳지 않은 단계예요."},
+ F:{n:"「예」 0개",s:"대표님 머릿속에만 있는 단계예요."}
 };
-/* 결과 = 네 영역(목표·조직·표준·업무) 등급 「조합」으로 읽어요. 낮음 = C 또는 F(예시의 기록 없음도 낮음으로 봐요).
-   t 제목 · s 지금 회사에서 벌어지고 있을 일 · w 왜 그런지 · k 먼저 잡을 영역 · f 지금 먼저 잡을 것 · c 상담 한 줄 */
+/* 영역 줄 = 실제 체크한 칸에서 만들어요(등급만 보고 단정하지 않아요).
+   G[i] = 위에서부터 처음 비어 있는 칸 i의 뜻(아직 자리 잡지 않음) · D[i] = 그 바로 위(없으면 아래로 가장 가까운) 체크한 칸 i(하고 계심) · A = 다섯 칸 모두.
+   영역마다 끝말을 달리 써서, 여러 줄이 같은 말로 반복되지 않게 해요 */
+const ROW={
+ goal:{A:"목표를 정하고 점검하고, 이룬 결과를 다음 목표에 반영하고 계세요.",
+  D:["올해 만들고 싶은 결과는 분명히 말씀하실 수 있어요.","꼭 볼 핵심 숫자는 알고 계세요.","이번 달 목표는 담당·기한과 함께 적어 두셨어요.","핵심 숫자는 정기 회의에서 점검하고 계세요.","목표를 이뤘는지 정기적으로 돌아보고 계세요."],
+  G:["올해 가장 중요하게 만들 결과를 한 문장으로 정해 두는 건 아직 자리 잡지 않았어요.","매출·문의처럼 꼭 볼 숫자를 정해 두는 건 아직 자리 잡지 않았어요.","이번 달 목표를 담당·기한과 함께 문서로 두는 건 아직 자리 잡지 않았어요.","핵심 숫자를 정기 회의에서 점검하고 기록하는 건 아직 자리 잡지 않았어요.","이룬 결과를 다음 목표에 반영하는 건 아직 자리 잡지 않았어요."]},
+ org:{A:"담당자가 대표 확인 없이 기준대로 끝까지 처리하고 있어요.",
+  D:["업무 영역별 담당은 정해 두셨어요.","직접 할 일과 넘길 일은 구분하고 계세요.","담당자와 책임 범위는 문서로 정해 두셨어요.","직원이 어디까지 정하는지 기준을 세워 두셨어요.","대표 확인 없이 담당자가 끝내는 일도 있어요."],
+  G:["업무 영역을 나누고 누가 맡는지는 아직 정해지지 않았어요.","대표님이 직접 할 일과 넘길 일의 구분은 아직 서지 않았어요.","담당자와 책임 범위를 문서로 남기는 건 아직 비어 있어요.","직원이 어디까지 정하고 어디서 확인받는지는 아직 선이 없어요.","담당자가 대표 확인 없이 끝까지 처리하는 건 아직 자리 잡기 전이에요."]},
+ std:{A:"실수가 생기면 매뉴얼까지 바로 고쳐서, 같은 실수가 덜 나요.",
+  D:["반복하는 핵심 업무 목록은 갖고 계세요.","업무마다 순서와 결과물을 말로 설명하실 수 있어요.","절차가 담긴 매뉴얼은 갖고 계세요.","실수·불만이 생겼을 때의 처리 기준은 있으세요.","실수가 생기면 돌아보고 고치는 습관은 있으세요."],
+  G:["반복하는 핵심 업무를 목록으로 뽑는 건 아직 손대기 전이에요.","일마다 순서·담당·결과물을 말로 풀어 두는 건 아직이에요.","절차·체크리스트를 담은 매뉴얼은 아직 만들기 전이에요.","실수·불만이 생겼을 때 누가 무엇을 할지는 아직 정해 두지 않으셨어요.","실수를 돌아보고 매뉴얼에 바로 반영하는 흐름은 아직 붙지 않았어요."]},
+ work:{A:"늦어지거나 빠진 일이 한눈에 보이고, 정기적으로 짚어서 손보고 계세요.",
+  D:["진행 중인 일은 한곳에 적어 두고 계세요.","회사 파일의 기본 저장 위치는 정해져 있어요.","업무마다 담당·마감·상태를 적어 두고 계세요.","회의 결정과 담당·기한은 회의록에 남기고 계세요.","늦어진 일은 정기적으로 점검하고 계세요."],
+  G:["진행 중인 일을 한곳에 모아 적는 건 아직 습관으로 붙기 전이에요.","회사 파일의 기본 저장 위치는 아직 정하기 전이에요.","업무마다 담당·마감·상태를 적어 두는 건 아직 습관으로 붙기 전이에요.","회의 결정·담당·기한을 회의록으로 남기는 습관은 아직 붙기 전이에요.","늦어지거나 빠진 일을 정기적으로 짚어 고치는 건 아직 남아 있어요."]},
+ ai:{A:"역할을 정해 둔 AI 직원이 반복 업무를 맡아 돌리고 있어요.",
+  D:["AI는 일상 업무에 쓰고 계세요.","AI가 참고할 회사 자료는 일부 모아 두셨어요.","업무별 지시문은 저장해 다시 쓰고 계세요.","맡길 때 목적과 결과물 기준을 같이 주고 계세요.","AI 직원이 맡아 하는 반복 업무도 있어요."],
+  G:["AI를 일상 업무에 두루 쓰는 건 아직 시작 전이에요.","AI가 참고할 회사 자료·기준을 모아 두는 건 아직 시작 전이에요.","업무별 지시문을 저장해 다시 쓰는 건 아직 시작 전이에요.","맡길 때 목적·자료·결과물 기준까지 같이 주는 건 아직 시작 전이에요.","역할이 정해진 AI 직원을 두는 건 아직 시작 전이에요."]}
+};
+const firstGap=arr=>[0,1,2,3,4].find(i=>!arr[i]);
+function rowText(r){
+  if(r.none)return r.a.k==="ai"?"AI 쪽도 이번 예시에서는 비워 뒀어요.":"예시 기록에 없어서 판단하지 않았어요.";
+  const T=ROW[r.a.k];
+  if(r.n===5)return T.A;
+  const fe=firstGap(r.arr);
+  const d=fe>0?fe-1:[1,2,3,4].find(i=>r.arr[i]);
+  return (d!==undefined?T.D[d]+" ":"")+T.G[fe];
+}
+/* 회사 문장 = 네 영역(목표·조직·표준·업무) 중 낮은 영역(C·F) 「조합」으로 골라요. 근거는 등급만.
+   s가 {F,C}면 낮은 영역이 전부 F일 때 F 장면, 아니면 C 장면. 조합 장면은 F·C 둘 다 맞는 말로 써요.
+   t 제목 · s 벌어지고 있을 일 · w 왜 그런지 · k 먼저 잡을 영역 · f 먼저 잡을 것 · c 상담 한 줄 */
 const SYS={goal:"목표 시스템",org:"조직 시스템",std:"표준 시스템",work:"업무 시스템",ai:"AI 시스템"};
-const C2="낮은 곳이 두 군데면 어디부터 할지가 제일 헷갈려요. 같이 보면서 순서를 정해 보면 좋겠어요.";
-const C3="낮은 곳이 세 군데예요. 혼자 하나씩 고치기보다 같이 보면서 순서를 잡는 게 훨씬 빨라요.";
+const C2="낮은 곳이 두 군데면 어디부터 손댈지가 가장 헷갈려요.";
+const C3="낮은 곳이 세 군데면 혼자 하나씩 고치다 지치기 쉬워요.";
+/* AI 영역에서 위에서부터 처음 비어 있는 칸에 맞춘 「먼저 잡을 것」 (다섯 칸 모두면 넓히기라 없음) */
+const AIF=["AI를 매일 일에 쓰는 습관을 회사에 들이는 AI 시스템을 구축하셔야 해요.",
+ "회사 자료와 기준을 AI가 꺼내 볼 수 있게 모으는 AI 시스템을 구축하셔야 해요.",
+ "자주 맡기는 일의 설명을 한 번 써 두고 계속 꺼내 쓰는 AI 시스템을 구축하셔야 해요.",
+ "무엇을 왜 맡기는지까지 함께 넘기는 AI 시스템을 구축하셔야 해요.",
+ "반복 업무를 사람이 매번 시키지 않아도 AI 직원이 맡아 돌리는 AI 시스템을 구축하셔야 해요."];
+/* 네 영역 중 B가 남고 AI는 A일 때: 그 B 영역에서 처음 비어 있는 칸을 다듬는 한 줄 */
+const WIDE={goal:["올해 가장 이루고 싶은 한 가지를 적어 두시면, AI 직원이 판단할 때 기댈 곳이 생겨요.",
+  "꼭 챙길 숫자를 골라 두시면, AI 직원이 일의 결과를 그 숫자로 비춰 볼 수 있어요.",
+  "이번 달 목표에 담당과 기한을 붙여 적어 두시면, AI 직원에게 넘길 일도 같이 또렷해져요.",
+  "핵심 숫자를 회의 때마다 짚어 남겨 두시면, AI 직원이 챙길 숫자도 같이 쌓여요.",
+  "목표를 이뤘는지 정기적으로 돌아보는 흐름을 붙이시면, AI 직원에게 맡길 수 있는 판단도 같이 늘어나요."],
+ org:["업무 영역마다 맡을 사람을 정해 두시면, AI 직원에게 넘길 일의 주인도 분명해져요.",
+  "손수 챙길 일과 맡길 일을 갈라 두시면, AI 직원에게 넘길 일도 같이 골라져요.",
+  "누가 어디까지 맡는지 적어 두시면, AI 직원이 맡을 범위도 같이 정해져요.",
+  "확인 없이 정해도 되는 선을 그어 두시면, AI 직원에게 넘길 수 있는 결정도 같이 늘어나요.",
+  "맡기는 기준을 정기적으로 돌아보고 고쳐 가시면, AI 직원에게 넘길 수 있는 결정도 같이 늘어나요."],
+ std:["자주 반복되는 일을 한 장에 추려 두시면, AI 직원에게 넘길 일의 후보도 같이 보여요.",
+  "일마다 누가 어떤 순서로 무엇을 내놓는지 정리해 두시면, AI 직원이 따라 할 순서도 같이 생겨요.",
+  "일하는 순서를 매뉴얼로 옮겨 두시면, AI 직원이 따라 할 순서도 같이 단단해져요.",
+  "문제가 생기면 따를 처리 순서를 정해 두시면, AI 직원이 막힐 때 기댈 기준도 생겨요.",
+  "실수가 날 때마다 매뉴얼까지 고치는 흐름을 붙이시면, AI 직원이 따라 할 순서도 같이 단단해져요."],
+ work:["진행 중인 일을 한 목록에 모아 두시면, AI 직원이 챙길 일도 같이 보여요.",
+  "회사 파일 자리를 정해 두시면, AI 직원이 찾아 쓸 자료도 같이 모여요.",
+  "업무마다 담당과 마감을 적어 두시면, AI 직원이 챙길 수 있는 일도 같이 늘어나요.",
+  "회의 결정을 회의록으로 남겨 두시면, AI 직원이 이어받을 일도 같이 분명해져요.",
+  "늦어진 일을 정기적으로 짚고 고치는 흐름을 붙이시면, AI 직원이 챙길 수 있는 일도 같이 늘어나요."]};
+/* 표준에 매뉴얼은 있을 때 「먼저 잡을 것」: 새로 적기보다 매뉴얼 밖 반복 업무까지 한 목록으로 묶기 */
+const STDM="매뉴얼 밖 반복 업무까지 한 목록으로 묶어 같은 기준으로 관리하는 표준 시스템을 구축하셔야 해요.";
+const AIPLUS=" AI를 잘 쓰고 계셔도, 이 바탕이 낮으면 AI가 내놓는 결과도 들쭉날쭉하기 쉬워요.";
 const PAT={
- allF:{t:"네 영역 모두 이제 시작이에요",
-  s:"직원이 「대표님 이거 어떻게 해요?」 하고 하루에도 몇 번씩 찾아오고, 대표님이 자리를 비우면 일이 멈춰요.",
-  w:"목표도, 맡은 사람도, 일하는 방법도 전부 대표님 머릿속에만 있어서 회사에 남는 게 없거든요.",
-  k:"goal",f:"회사가 올해 어디로 가는지, 무슨 숫자를 볼지부터 정하는 목표 시스템을 구축하셔야 해요.",
-  c:"네 영역을 한꺼번에 시작해야 할 때는 혼자 순서를 잡기보다, 같이 보면서 첫 칸부터 정하는 게 훨씬 빨라요."},
- allLow:{t:"기초부터 다시 잡을 때예요",
-  s:"같은 걸 직원에게 세 번째 설명하고 있고, 그 설명은 어디에도 남지 않아요.",
-  w:"목표부터 맡은 사람, 일하는 방법, 업무 기록까지 어디에도 적혀 있지 않아서, 일한 내용이 회사에 쌓이지 않고 매일 사라지는 거예요.",
-  k:"goal",f:"회사가 올해 어디로 가는지, 무슨 숫자를 볼지부터 정하는 목표 시스템을 구축하셔야 해요.",
-  c:"낮은 곳이 네 군데면 혼자 하나씩 고치기보다, 같이 보면서 순서를 잡는 게 훨씬 빨라요."},
- allC:{t:"말로는 다 되는데 남는 게 없어요",
-  s:"목표도 일하는 방법도 대표님이 말로는 다 설명하시는데, 적어 둔 데가 없어서 회의 때마다 처음부터 다시 말하고 계실 거예요.",
-  w:"기준이 말로만 있고 목표부터 업무까지 한곳에 적혀 있지 않아서, 한 번 한 설명을 다시 꺼내 쓸 수가 없거든요.",
-  k:"goal",f:"말로 하던 목표를 담당·기한이 적힌 문서로 옮기는 목표 시스템을 구축하셔야 해요.",
-  c:"네 영역 모두 말로는 되고 있어요. 뭘 먼저 문서로 옮길지 같이 정해 보면 좋겠어요."},
- "goal,org":{t:"일은 잘 도는데 방향이 없어요",
-  s:"직원들은 매뉴얼대로 바쁘게 일하는데, 뭘 먼저 할지는 결국 대표님이 하나하나 정해 주고 계실 거예요.",
-  w:"일하는 방법과 업무 기록은 쌓였는데 그 위에 목표와 맡은 사람의 기준이 없어서, 판단이 전부 대표님께 몰리는 거예요.",
-  k:"goal",f:"회사 목표와 볼 숫자를 담당·기한까지 정해 두는 목표 시스템을 구축하셔야 해요.",
-  c:"아래 두 영역은 이미 잡혀 있어요. 목표와 맡길 범위를 어떻게 정할지 같이 보면 좋겠어요."},
- "std,work":{t:"방향은 있는데 일이 남지 않아요",
-  s:"사람이 바뀔 때마다 일을 처음부터 다시 가르치고, 지난달에 어떻게 했는지는 카톡을 뒤져야 나올 거예요.",
-  w:"목표와 맡은 사람은 정해졌는데 일하는 방법과 업무 기록이 한곳에 모이지 않아서, 회사에 쌓이질 않고 AI에게 넘길 것도 없는 거예요.",
-  k:"std",f:"반복하는 일을 누가 와도 따라 할 수 있게 회사 매뉴얼을 구축하셔야 해요.",
-  c:"목표랑 역할은 잡혀 있어요. 어떤 일부터 매뉴얼로 옮길지 같이 골라 보면 좋겠어요."},
- "goal,std":{t:"사람은 있는데 기준이 없어요",
-  s:"누가 뭘 맡는지는 정해져 있는데, 사람마다 일하는 방식이 달라서 결과물이 매번 들쭉날쭉해요.",
-  w:"목표가 흐리고 매뉴얼도 없으니, 맡은 사람이 각자 자기 기준으로 일하고 있는 거예요.",
-  k:"goal",f:"잘한 일의 기준이 되는 회사 목표와 숫자부터 정하는 목표 시스템을 구축하셔야 해요.",c:C2},
- "goal,work":{t:"바쁜데 남는 게 없어요",
-  s:"매일 바쁜데 무슨 일이 어디까지 됐는지는 카톡을 뒤져야 알고, 월말이면 「이번 달 뭐 했지?」 싶으실 거예요.",
-  w:"목표가 없으니 뭘 기록할지도 안 정해지고, 업무 기록이 흩어져서 아무것도 쌓이지 않는 거예요.",
-  k:"goal",f:"이번 달 무엇을 이룰지와 볼 숫자를 정하는 목표 시스템을 구축하셔야 해요.",c:C2},
- "org,std":{t:"일이 사람을 따라다녀요",
-  s:"그 일은 그 직원만 알아서, 그 사람이 휴가를 가면 일이 멈추거나 대표님이 대신 하고 계실 거예요.",
-  w:"목표는 있는데 누가 어디까지 맡는지, 어떻게 하는지가 문서로 없어서 일이 사람한테만 붙어 있는 거예요.",
-  k:"org",f:"담당자와 책임 범위를 문서로 정하는 조직 시스템을 구축하셔야 해요.",c:C2},
- "org,work":{t:"모든 확인이 대표님을 거쳐요",
-  s:"누가 뭘 하고 있는지 대표님이 직접 물어봐야 알고, 그 확인하느라 대표님 일은 밤에 하고 계실 거예요.",
-  w:"목표와 매뉴얼은 있는데 맡은 사람과 진행 상황이 안 보여서, 모든 확인이 대표님께 몰리는 거예요.",
-  k:"org",f:"누가 무엇을 어디까지 맡는지 정하는 조직 시스템을 구축하셔야 해요.",c:C2},
- goal:{t:"다 갖췄는데 목표만 흐려요",
-  s:"직원들은 각자 맡은 일을 열심히 하는데, 연말에 돌아보면 「그래서 올해 뭘 이뤘지?」 싶으실 거예요.",
-  w:"맡은 사람도 매뉴얼도 업무 기록도 다 돌아가는데, 맨 위에 목표와 숫자가 없어서 쌓인 일이 한 방향으로 모이지 않거든요.",
-  k:"goal",f:"올해 목표와 볼 숫자를 정하고 회의에서 점검하는 목표 시스템을 구축하셔야 해요.",
-  c:"나머지 세 영역은 이미 돌아가고 있어요. 목표 하나를 어떻게 세울지 같이 보면 좋겠어요."},
- org:{t:"일은 도는데 결정은 다 대표님이 해요",
-  s:"작은 결정 하나까지 「대표님 이거 해도 돼요?」 하고 물어보러 와서, 대표님 하루가 확인하다 끝나요.",
-  w:"목표도 매뉴얼도 있는데 누가 어디까지 결정하는지 기준이 없어서, 모든 판단이 대표님께 돌아오는 거예요.",
+ allF:{t:"네 영역 모두 이제 세워 갈 때예요",
+  s:"직원이 「대표님 이거 어떻게 해요?」 하고 하루에도 몇 번씩 찾아오고, 대표님이 자리를 비우면 일이 멈출 거예요.",
+  w:"일하는 기준이 아직 회사에 적혀 있지 않아서, 모든 게 대표님 한 분께 기대고 있거든요.",
+  k:"goal",f:"회사 방향과 볼 숫자를 정해 적는 목표 시스템부터 구축하셔야 해요. 나머지 세 영역도 이걸 기준으로 채워져요.",
+  c:"네 영역을 한꺼번에 시작할 때는 첫걸음을 어디에 둘지가 가장 막막해요."},
+ allC:{t:"네 영역 모두 첫발은 뗐어요",
+  s:"영역마다 해 둔 것이 한두 가지씩은 있는데, 서로 이어지지 않아서 같은 얘기를 여러 번 하고 계실 거예요.",
+  w:"아직 회사 기준으로 굳기 전이라, 한 영역에서 정한 것이 다른 영역으로 이어지기 어렵거든요.",
+  k:"goal",f:"다른 영역의 기준이 되는 회사 방향과 숫자를 정하는 목표 시스템부터 구축하셔야 해요.",
+  c:"네 영역이 고르게 낮으면 어디부터 손댈지 고르기가 가장 어려워요."},
+ allLow:{t:"네 영역 모두 기초부터 잡을 때예요",
+  s:"일이 대표님을 거쳐야 움직여서, 하루 대부분을 확인과 설명에 쓰고 계실 거예요.",
+  w:"어느 영역도 회사 기준으로 서기 전이라, 한 번 정한 것이 다음 일의 바탕으로 남기 어렵거든요.",
+  k:"goal",f:"회사가 올해 어디로 가는지, 무슨 숫자를 볼지 정하는 목표 시스템부터 구축하셔야 해요.",
+  c:"낮은 곳이 네 군데면 혼자 하나씩 고치다 지치기 쉬워요."},
+ goal:{t:"일은 쌓이는데 방향을 모으는 목표가 약해요",
+  s:{F:"직원들은 각자 맡은 일을 하는데, 연말에 돌아보면 「그래서 올해 뭘 이뤘지?」 싶으실 거예요.",
+     C:{0:"올해 가장 중요한 결과가 한 문장으로 서 있지 않아서, 회의 때마다 우선순위를 다시 정하고 계실 거예요.",
+        1:"방향은 서 있는데 꼭 볼 숫자가 모두에게 같지 않아서, 잘되고 있는지는 대표님 감으로 판단하고 계실 거예요.",
+        2:"방향과 숫자는 대표님이 알고 계신데, 이번 달 목표로 적혀 있지 않아서 직원마다 우선순위가 조금씩 다를 거예요."}},
+  w:{F:"목표가 회사 기준으로 서기 전이라, 한 일이 같은 방향으로 모였는지 비춰 볼 잣대가 약하거든요.",
+     C:{0:"무엇을 이루려는지가 회사 기준으로 서기 전이라, 한 일이 같은 방향으로 모였는지 비춰 볼 잣대가 약하거든요.",
+        1:"꼭 볼 숫자가 회사 기준으로 서기 전이라, 방향에 얼마나 다가갔는지 재 볼 잣대가 약하거든요.",
+        2:"목표가 담당·기한이 붙은 문서로 내려가기 전이라, 직원이 같은 방향을 보고 움직이기 어렵거든요."}},
+  k:"goal",f:"회사 방향과 꼭 볼 숫자를 정하고 점검하는 목표 시스템을 구축하셔야 해요.",
+  c:"다른 영역이 이미 돌아가고 있어서, 목표 하나만 바로 서도 달라지는 게 커요."},
+ org:{t:"일은 도는데 결정이 대표님께 모이기 쉬워요",
+  s:{F:"작은 결정 하나까지 「대표님 이거 해도 돼요?」 하고 물어보러 와서, 대표님 하루가 확인하다 끝나실 거예요.",
+     C:{0:"일이 생길 때마다 누구에게 줄지 그때그때 정하고 계실 거예요.",
+        1:"맡길 사람은 있는데, 무엇을 넘기고 무엇을 직접 할지 선이 없어서 대표님 손에 남는 일이 많으실 거예요.",
+        2:"누가 무엇을 맡는지는 다들 아는데, 어디까지 맡는지는 적혀 있지 않아서 경계에 걸친 일은 대표님께 오기 쉬워요."}},
+  w:{F:"맡기는 선이 회사 기준으로 서기 전이라, 판단이 한곳으로 몰리거든요.",
+     C:{0:"업무 영역과 맡는 사람이 회사 기준으로 나뉘기 전이라, 판단이 한곳으로 몰리거든요.",
+        1:"대표님 몫과 넘길 몫이 회사 기준으로 갈리기 전이라, 일이 다시 대표님께 돌아오기 쉽거든요.",
+        2:"맡는 범위가 문서로 남기 전이라, 경계에 걸친 일의 판단이 한곳으로 몰리거든요."}},
   k:"org",f:"담당자와 결정 범위를 문서로 정하는 조직 시스템을 구축하셔야 해요.",
-  c:"다른 영역은 갖춰져 있어요. 어디까지 맡길지 선을 같이 그어 보면 좋겠어요."},
- std:{t:"회사에 매뉴얼이 없어요",
-  s:"새 직원이 올 때마다 같은 걸 처음부터 다시 가르치고, 잘하던 직원이 나가면 그 노하우도 같이 나가요.",
-  w:"목표와 역할은 있는데 일하는 방법이 사람 머릿속에만 있어서, 다음 사람이 이어받을 수가 없거든요.",
-  k:"std",f:"반복 업무를 처음 온 사람도 따라 할 수 있게 회사 매뉴얼을 구축하셔야 해요.",
-  c:"매뉴얼이 있어야 사람에게도 AI에게도 일을 넘길 수 있어요. 어떤 일부터 쓸지 같이 골라 보면 좋겠어요."},
- work:{t:"업무 기록이 매일 사라지고 있어요",
-  s:"업무 내용이 카톡과 대표님 머릿속에서 매일 사라지고, 「그거 어디까지 됐어요?」를 하루에도 몇 번씩 묻고 계실 거예요.",
-  w:"목표, 역할, 매뉴얼은 다 있는데 일과 회의 기록이 한곳에 모이지 않아서, AI에게 넘길 업무 데이터가 쌓이질 않는 거예요.",
-  k:"work",f:"일·회의·파일을 한곳에 모아 담당·마감·상태가 보이는 업무 시스템을 구축하셔야 해요.",
-  c:"업무 기록만 모이면 AI 붙일 일을 고를 수 있는 단계예요. 어디부터 모을지 같이 보면 좋겠어요."},
- "org,std,work":{t:"목표는 있는데 아무도 안 따라와요",
-  s:"목표는 분명한데 직원들은 그게 자기 일과 무슨 상관인지 몰라서, 결국 대표님 혼자 뛰고 계실 거예요.",
-  w:"목표 아래로 맡은 사람, 일하는 방법, 업무 기록이 이어지지 않아서, 목표가 대표님 혼자만 아는 숫자로 남는 거예요.",
+  c:"다른 영역이 받쳐 주고 있어서, 이것만 풀려도 대표님 시간이 많이 돌아와요."},
+ std:{t:"일하는 방법이 회사에 덜 쌓였어요",
+  s:{F:"새 직원이 올 때마다 같은 걸 처음부터 가르치고, 잘하던 직원이 나가면 그 노하우도 같이 나갈 거예요.",
+     C:{0:"어떤 일이 반복되는지 목록으로 모여 있지 않아서, 새 직원은 일이 생길 때마다 하나씩 물어보며 배우고 있을 거예요.",
+        1:"반복 업무 목록은 있는데, 순서와 결과물을 설명하는 방식이 사람마다 달라서 같은 일도 결과물이 조금씩 다를 거예요.",
+        2:"순서는 말로 설명하실 수 있는데, 적힌 매뉴얼이 없어서 새 직원이 올 때마다 처음부터 다시 말해 주고 계실 거예요.",
+        M:"매뉴얼은 있는데 다른 부분이 비어 있어서, 매뉴얼 밖 일은 여전히 사람마다 다르게 하고 계실 거예요."}},
+  w:{F:"순서와 기준이 회사 것으로 굳기 전이라, 다음 사람이 그대로 이어받기 어렵거든요.",
+     C:{0:"반복 업무가 무엇인지부터 회사 기준으로 모이기 전이라, 다음 사람이 그대로 이어받기 어렵거든요.",
+        1:"업무마다 순서와 결과물이 회사 기준으로 굳기 전이라, 다음 사람이 그대로 이어받기 어렵거든요.",
+        2:"말로 전하는 순서가 문서로 옮겨지기 전이라, 설명하는 사람이 없으면 이어받기 어렵거든요.",
+        M:"매뉴얼에 담긴 일과 빠진 일의 경계가 정리되기 전이라, 빠진 일은 다음 사람이 이어받기 어렵거든요."}},
+  k:"std",f:x=>x.cv==="M"?STDM:"반복 업무를 처음 온 사람도 따라 할 수 있게 정리하는 표준 시스템을 구축하셔야 해요.",
+  c:x=>x.cv==="M"?"매뉴얼에 든 일과 빠진 일을 한 목록으로 묶으면, 사람에게도 AI에게도 넘기기 쉬워져요.":"한 번 적어 두면 사람에게도 AI에게도 그대로 넘길 수 있어요."},
+ work:{t:"일의 흐름이 회사에 덜 남아요",
+  s:{F:"「그거 어디까지 됐어요?」를 하루에도 몇 번씩 묻고 계실 거예요.",
+     C:{0:"사람마다 적는 곳이 달라서, 지난주 일을 찾으려면 이 방 저 방을 뒤지고 계실 거예요.",
+        1:"할 일은 한곳에 적어 두시는데, 파일 둘 자리가 정해지지 않아서 자료를 찾느라 시간을 쓰고 계실 거예요.",
+        2:"적어 두는 곳은 있는데 담당·마감까지는 안 보여서, 「그거 누가 해요?」를 하루에도 몇 번씩 물으실 거예요."}},
+  w:{F:"지난 일이 회사 기록으로 쌓이기 전이라, 다음 일을 할 때 꺼내 쓰기 어렵거든요.",
+     C:{0:"진행 중인 일이 한곳에 쌓이기 전이라, 다음 일을 할 때 꺼내 쓰기 어렵거든요.",
+        1:"파일 둘 곳이 회사 기준으로 정해지기 전이라, 지난 자료를 다음 일에 꺼내 쓰기 어렵거든요.",
+        2:"누가 언제까지 하는지가 기록으로 남기 전이라, 진행 상황을 직접 물어야 알 수 있거든요."}},
+  k:"work",f:"일·회의·파일을 한곳에 모아 누가 무엇을 언제까지 하는지 보이게 하는 업무 시스템을 구축하셔야 해요.",
+  c:"업무 기록이 모일수록 AI에게 넘길 수 있는 일도 늘어나요."},
+ "goal,org":{t:"일은 도는데 방향과 판단이 대표님께 모이기 쉬워요",
+  s:x=>x.has("goal",2,3)||x.has("org",2,3)?"목표나 맡는 기준이 일부 적혀 있어도 서로 이어지지 않아서, 애매한 일은 결국 대표님이 정해 주고 계실 거예요.":"직원들은 바쁘게 일하는데, 뭘 먼저 할지는 결국 대표님이 하나하나 정해 주고 계실 거예요.",
+  w:x=>x.has("goal",2,3)||x.has("org",2,3)?"적어 둔 목표와 맡는 기준이 한 흐름으로 묶이기 전이라, 판단이 대표님께 다시 모이거든요.":"무엇을 우선할지와 누가 판단할지가 회사 기준으로 정리되기 전이거든요.",
+  k:"goal",f:"회사 방향과 꼭 볼 숫자를 담당·기한까지 정해 두는 목표 시스템을 구축하셔야 해요.",c:C2},
+ "std,work":{t:"일하는 방법과 기록이 덜 쌓였어요",
+  s:x=>x.has("std",2,3)||x.has("work",0,2,3)?"적어 둔 것은 있는데 한데 묶여 있지 않아서, 사람이 바뀌면 어디서부터 봐야 할지 다시 알려 주고 계실 거예요.":"사람이 바뀔 때마다 일을 다시 가르치고, 지난달에 어떻게 했는지는 대화방을 뒤져야 나올 거예요.",
+  w:x=>x.has("std",2,3)||x.has("work",0,2,3)?"적어 둔 순서와 기록이 한 흐름으로 묶이기 전이라, 다음 사람이 어디서부터 이어받을지 알기 어렵거든요.":"한 번 해 본 일이 회사 기준으로 정리되기 전이라, 다음 사람에게 넘어가지 않거든요.",
+  k:"std",f:x=>x.has("std",2)?STDM:"반복 업무를 누가 와도 따라 할 수 있게 정리하는 표준 시스템을 구축하셔야 해요.",c:C2},
+ "goal,std":{t:"잘한 기준과 일하는 방법이 덜 잡혔어요",
+  s:x=>x.has("std",2)?"매뉴얼은 있는데 무엇을 잘한 일로 볼지가 없어서, 결과물 품질이 사람마다 제각각일 거예요.":"사람마다 일하는 방식이 달라서, 결과물 품질이 매번 제각각일 거예요.",
+  w:x=>x.has("std",2)?"순서는 매뉴얼에 있어도 무엇을 잘한 일로 볼지가 회사 기준으로 서기 전이거든요.":"무엇을 잘한 일로 볼지와 어떤 순서로 할지가 회사 기준으로 정리되기 전이거든요.",
+  k:"goal",f:"잘한 일의 기준이 되는 회사 방향과 숫자를 정하는 목표 시스템을 구축하셔야 해요.",c:C2},
+ "goal,work":{t:"바쁜데 남는 게 적어요",
+  s:x=>x.has("goal",2,3)||x.has("work",0,2,3)?"목표나 할 일이 적힌 곳은 있어도 서로 이어지지 않아서, 월말에 한 일이 목표에 얼마나 다가갔는지 따로 맞춰 보고 계실 거예요.":"매일 바쁜데 월말이면 「이번 달 뭐 했지?」 싶으실 거예요.",
+  w:x=>x.has("goal",2,3)||x.has("work",0,2,3)?"적어 둔 목표와 일한 기록이 한 기준으로 이어지기 전이라, 둘을 맞춰 보는 데 손이 많이 가거든요.":"목표와 일한 기록이 회사 기준으로 서기 전이라, 한 일이 목표에 얼마나 다가갔는지 확인하기 어렵거든요.",
+  k:"goal",f:"이번 달 무엇을 이룰지와 볼 숫자를 정하는 목표 시스템을 구축하셔야 해요.",c:C2},
+ "org,std":{t:"일이 사람을 따라다니기 쉬워요",
+  s:x=>x.has("std",2)?"매뉴얼은 있는데 어디까지 누가 맡을지 선이 그어지지 않아서, 맡은 직원이 휴가를 가면 일이 멈추거나 대표님이 대신 하고 계실 거예요.":"그 일은 그 직원만 알아서, 그 사람이 휴가를 가면 일이 멈추거나 대표님이 대신 하고 계실 거예요.",
+  w:x=>x.has("std",2)?"순서는 매뉴얼에 있어도 누가 어디까지 맡는지가 회사 기준으로 서기 전이거든요.":"맡은 범위와 일하는 순서를 다른 사람이 이어받을 장치가 약하거든요.",
+  k:"org",f:"누가 무엇을 맡고 어디까지 책임지는지 정하는 조직 시스템을 구축하셔야 해요.",c:C2},
+ "org,work":{t:"맡김과 진행 상황이 덜 보여요",
+  s:x=>x.has("work",2)?"담당·마감은 적혀 있는데 맡기는 선이 흐려서, 경계에 걸친 일은 결국 대표님이 챙기고 계실 거예요.":x.has("work",0,3)?"일을 적어 두는 곳은 있는데 맡기는 선이 흐려서, 누가 챙길지 애매한 일은 대표님께 돌아오고 있을 거예요.":"누가 뭘 하고 있는지 대표님이 직접 물어봐야 알고, 대표님 일은 밤에 하고 계실 거예요.",
+  w:x=>x.has("work",0,2,3)?"적힌 기록은 있어도 누가 어디까지 맡는지가 회사 기준으로 서기 전이거든요.":"맡은 사람과 진행 상황을 적어 두는 회사 기준이 서기 전이거든요.",
+  k:"org",f:"누가 무엇을 어디까지 맡는지 정하는 조직 시스템을 구축하셔야 해요.",c:C2},
+ "org,std,work":{t:"목표 아래로 일이 덜 이어져요",
+  s:"목표를 말해도 직원들은 그게 자기 일과 무슨 상관인지 몰라서, 대표님 혼자 뛰고 계실 거예요.",
+  w:"조직·표준·업무가 회사 기준으로 서기 전이라, 목표가 맡은 사람과 일하는 순서로 내려가기 어렵거든요.",
   k:"org",f:"목표를 누가 어디까지 맡을지 나누는 조직 시스템을 구축하셔야 해요.",c:C3},
- "goal,std,work":{t:"역할은 나눴는데 맡겨지지 않아요",
-  s:"역할은 나눠 놨는데 뭘 잘한 걸로 볼지 정해진 게 없어서, 결과물을 결국 대표님이 다 다시 보고 계실 거예요.",
-  w:"목표가 없으니 잘한 기준이 없고, 매뉴얼과 업무 기록도 없어서 맡겨도 다시 확인해야 하는 거예요.",
-  k:"goal",f:"잘한 일의 기준이 되는 회사 목표와 숫자를 정하는 목표 시스템을 구축하셔야 해요.",c:C3},
- "goal,org,work":{t:"매뉴얼은 있는데 일과 안 이어져요",
-  s:"매뉴얼은 만들어 뒀는데 누가 언제 그걸 쓰는지 아무도 챙기지 않아서, 서랍 속 문서가 되어 있을 거예요.",
-  w:"목표와 담당자가 없고 업무도 한곳에 안 모이니, 애써 만든 매뉴얼이 실제 일과 이어지지 않는 거예요.",
-  k:"goal",f:"매뉴얼을 어느 일에 먼저 쓸지 정해 주는 목표 시스템을 구축하셔야 해요.",c:C3},
- "goal,org,std":{t:"할 일은 쌓이는데 기준이 없어요",
-  s:"할 일 목록은 매일 길어지는데, 뭐가 중요한지와 누가 판단할지는 결국 대표님이 정하고 계실 거예요.",
-  w:"업무는 한곳에 모이는데 그 위에 목표, 역할, 매뉴얼이 없어서, 쌓인 기록을 기준 삼아 쓸 수가 없는 거예요.",
+ "goal,std,work":{t:"맡길 바탕이 덜 갖춰졌어요",
+  s:"일을 맡겨도 결과물을 결국 대표님이 하나하나 다시 보고 계실 거예요.",
+  w:"잘한 기준과 일하는 순서가 회사 기준으로 서기 전이라, 맡은 사람에게 전해지기 어렵거든요.",
+  k:"goal",f:"잘한 일의 기준이 되는 회사 방향과 숫자를 정하는 목표 시스템을 구축하셔야 해요.",c:C3},
+ "goal,org,work":{t:"할 일의 순서와 주인이 덜 정해졌어요",
+  s:"급한 일부터 처리하다 보면, 정작 중요한 일은 이번 주에도 뒤로 밀려 있을 거예요.",
+  w:"무엇을 먼저 하고 누가 맡을지가 회사 기준으로 정해지기 전이거든요.",
+  k:"goal",f:"회사가 무엇을 먼저 이룰지와 볼 숫자를 정하는 목표 시스템을 구축하셔야 해요.",c:C3},
+ "goal,org,std":{t:"할 일은 보이는데 판단 기준이 덜 잡혔어요",
+  s:"직원이 일을 끝내 와도, 잘된 건지는 대표님이 보셔야 판단이 날 거예요.",
+  w:"무엇이 잘된 일인지 비춰 볼 회사 기준이 서기 전이거든요.",
   k:"goal",f:"쌓이는 일 중 무엇이 중요한지 정해 주는 목표 시스템을 구축하셔야 해요.",c:C3},
- aiLow:{t:"이제 AI를 붙일 차례예요",
-  s:"매뉴얼도 업무 기록도 다 있는데, 그 일을 아직 사람이 하나하나 손으로 하고 계실 거예요.",
-  w:"목표부터 업무까지 기준과 데이터가 한곳에 모여 있어서, 지금이 AI에게 일을 넘기기 가장 좋은 상태거든요.",
-  k:"ai",f:"쌓아 둔 매뉴얼로 AI 직원에게 반복 업무를 맡기는 AI 시스템을 구축하셔야 해요.",
-  c:"준비는 이미 돼 있어요. 어떤 업무부터 AI에게 붙일지 같이 골라 보면 좋겠어요."},
- aiB:{t:"AI 직원을 들일 차례예요",
-  s:"지시문은 저장해서 쓰고 있는데, 매번 대표님이 직접 AI 창을 열고 시키고 계실 거예요.",
-  w:"목표부터 업무까지 기준과 데이터가 모여 있고 지시문도 쌓여 있어서, 그 일을 AI 직원에게 통째로 넘길 수 있는 상태거든요.",
-  k:"ai",f:"역할이 정해진 AI 직원에게 반복 업무를 맡기는 AI 시스템을 구축하셔야 해요.",
-  c:"어떤 업무를 AI 직원에게 통째로 넘길지 같이 골라 보면 좋겠어요."},
- aiA:{t:"AI 직원이 일하고 있어요",
-  s:"AI 직원이 반복 업무를 맡고 있는데, 잘하고 있는지 확인하는 건 아직 대표님 몫일 거예요.",
-  w:"AI가 일하는 만큼 목표와 매뉴얼도 같이 고쳐 줘야, 쌓인 데이터가 계속 쓸모 있거든요.",
-  k:"ai",f:"AI 직원의 결과를 정기적으로 점검해 매뉴얼에 반영하는 AI 시스템을 구축하셔야 해요.",
-  c:"지금 구조에서 AI 직원에게 더 넘길 수 있는 업무가 있는지 같이 골라 보면 좋겠어요."},
- allA:{t:"다섯 영역 모두 A예요",
-  s:"대표님이 자리를 비워도 일이 돌아가고, AI 직원이 반복 업무를 맡아 하고 있어요.",
-  w:"목표부터 업무까지 기준과 데이터가 한곳에 쌓이고, 그 위에서 AI가 일하는 구조라서 그래요.",
-  k:null,f:"AI 직원이 맡을 업무를 하나씩 넓혀 가시면 돼요.",
-  c:"지금 구조에서 AI 직원에게 더 넘길 수 있는 업무가 있는지 같이 골라 보면 좋겠어요."}
+ aiF:{t:"이제 AI를 붙여 볼 차례예요",
+  s:"반복 업무를 아직 사람이 하나하나 하고 계실 거예요.",
+  w:"목표부터 업무까지 바탕이 서 있어서, 이제 AI에게 일을 넘겨 볼 수 있거든요.",
+  k:"ai",f:AIF[0],
+  c:"어떤 업무부터 AI에게 붙일지가 첫 고민이 될 거예요."},
+ aiC:{t:"AI를 회사 방식으로 쓰기 전이에요",
+  s:x=>x.aiUse?"같은 일을 시켜도 결과가 매번 달라서, 결국 대표님이 다시 손보고 계실 거예요.":"AI에게 줄 자료는 조금 있는데, 실제 일은 아직 사람이 손으로 하고 계실 거예요.",
+  w:x=>x.aiUse?"네 영역의 바탕은 서 있어서, AI 쓰는 방식만 맞추면 결과가 고르게 나올 수 있어요.":"네 영역의 바탕은 서 있어서, AI를 실제 일에 쓰기 시작하면 모아 둔 자료가 바로 쓰일 수 있어요.",
+  k:"ai",f:x=>AIF[x.aiGap],
+  c:"어떤 일부터 AI에게 맡기는 방식을 맞출지 고르는 게 첫 고민이에요."},
+ aiB:{t:"AI에게 더 깊이 맡길 차례예요",
+  s:"AI에게 맡기는 일은 있는데, 여전히 사람이 하나하나 시켜야 돌아가는 일이 많으실 거예요.",
+  w:"네 영역의 바탕이 서 있어서, AI에게 넘기는 방법만 바꿔도 대표님 손이 줄 수 있어요.",
+  k:"ai",f:x=>AIF[x.aiGap],
+  c:"어떤 업무를 AI에게 통째로 넘겨 볼지가 다음 고민이에요."},
+ /* AI는 A, 네 영역 중 B가 남은 경우: 구축 대신 B 영역 다듬기 */
+ aiA:{wide:true,lab:"다음으로 다듬을 것",h:"더 다듬어 보고 싶다면",t:"AI는 앞서 있고, 바탕만 다듬으면 돼요",
+  s:"AI가 해 놓은 결과를 대표님이 마지막에 다시 손보고 계실 거예요.",
+  w:x=>`${x.bNames} 쪽에 아직 빈 칸이 남아 있어서, AI가 참고하는 회사 기준에도 빈 곳이 생기기 쉽거든요.`,
+  k:x=>x.bKey,f:x=>WIDE[x.bKey][x.bGap],
+  c:"어느 기준부터 다듬을지 같이 보면, AI에게 넘길 일도 함께 정리돼요."},
+ /* 다섯 영역 모두 A: 칭찬 + AI 업무 넓히기 */
+ allA:{wide:true,lab:"다음으로 넓혀 볼 것",t:"다섯 영역 모두 A예요",
+  s:"대표님이 자리를 비워도 일이 돌아가는 구조예요.",
+  w:"정해 둔 기준과 쌓인 기록이 일을 끌고 가고 있거든요.",
+  k:"ai",f:"지금 사람이 하는 일 중 하나를 골라 AI에게 더 넘겨 보시면 돼요.",
+  c:"다 갖춘 회사일수록, 한 번 더 넓힐 곳은 밖에서 볼 때 잘 보여요."}
 };
 function pickPattern(res){
   const four=res.slice(0,4),ai=res[4];
-  const isLow=r=>r.none||r.g==="C"||r.g==="F";
-  const lowKeys=four.filter(isLow).map(r=>r.a.k);
+  const known=four.filter(r=>!r.none);
+  const lowKeys=known.filter(r=>r.g==="C"||r.g==="F").map(r=>r.a.k);
+  const lo=P=>({...P,low:true});
   if(lowKeys.length===4){
-    const known=four.filter(r=>!r.none);
-    if(known.length&&known.every(r=>r.g==="F"))return PAT.allF;
-    if(known.length&&known.every(r=>r.g==="C"))return PAT.allC;
-    return PAT.allLow;
+    if(four.every(r=>r.g==="F"))return lo(PAT.allF);
+    if(four.every(r=>r.g==="C"))return lo(PAT.allC);
+    return lo(PAT.allLow);
   }
-  if(lowKeys.length)return PAT[lowKeys.join(",")];
-  const aiG=ai.none?"F":ai.g;
-  if(aiG==="F"||aiG==="C")return PAT.aiLow;
-  if(aiG==="B")return PAT.aiB;
+  if(lowKeys.length)return lo(PAT[lowKeys.join(",")]);
+  if(ai.n===0)return PAT.aiF;
+  if(ai.n<=2)return PAT.aiC;
+  if(ai.n<=4)return PAT.aiB;
   return four.every(r=>r.g==="A")?PAT.allA:PAT.aiA;
 }
 const ORDER=["F","C","B","A"];
 const grade=n=>n>=5?"A":n>=3?"B":n>=1?"C":"F";
-/* 예시 A(조직 기초 1만 「예」, 표준·AI는 기록 없음) */
-const DEMO={goal:[0,0,0,0,0],org:[1,0,0,0,0],std:[0,0,0,0,0],work:[0,0,0,0,0],ai:[0,0,0,0,0],touched:true,none:["std","ai"]};
+/* 예시 회사(유아용품 브랜드, 작은 팀): 조직 첫 칸만 「예」, 표준·AI는 예시 기록 없음 */
+const DEMO={goal:[0,0,0,0,0],org:[1,0,0,0,0],std:[0,0,0,0,0],work:[0,0,0,0,0],ai:[0,0,0,0,0],none:["std","ai"]};
 const KEY="ai-work-diagnosis-v1";
 let mine={};
 try{mine=JSON.parse(localStorage.getItem(KEY)||"{}")||{}}catch(e){mine={}}
-let demo=null;
+let demo=null,undo=null;
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(mine))}catch(e){}};
 const view=()=>demo||mine;
 const $=id=>document.getElementById(id);
@@ -346,19 +458,35 @@ const $=id=>document.getElementById(id);
 const box=$("areas");
 AREAS.forEach(a=>{
   const el=document.createElement("section");el.className="area";el.id="area-"+a.k;
-  el.innerHTML=`<div class="ahead"><h2>${a.n}<span class="what">${a.what}</span></h2><span class="g" id="g-${a.k}">F</span></div>
-  <div class="diag" id="d-${a.k}"></div>
+  el.innerHTML=`<div class="ahead"><h2>${a.n}<span class="what">${a.what}</span></h2></div>
   <div class="crit">체크 기준: ${a.crit}</div>
+  <div class="nonote" id="nn-${a.k}" hidden>예시 기록에 없는 영역이라 비워 뒀어요.</div>
   ${a.q.map((q,i)=>`<label class="q"><input type="checkbox" id="${a.k}-${i}" data-a="${a.k}" data-i="${i}"><span class="qt"><span class="lv">${q[0]}</span>${q[1]}${q[2]?` <span class="gl">(${q[2]})</span>`:""}</span></label>`).join("")}
   <div class="cnt" id="c-${a.k}">「예」 0 / 5</div>`;
   box.appendChild(el);
 });
-box.addEventListener("change",e=>{const t=e.target;if(!t.matches("input[type=checkbox]"))return;
-  if(demo){t.checked=!t.checked;return;}
-  const s=view();(s[t.dataset.a]=s[t.dataset.a]||[])[+t.dataset.i]=t.checked?1:0;s.touched=true;if(!demo)save();render();});
-$("btnReset").addEventListener("click",()=>{if(demo){demo=null;render();return;}mine={};save();render();});
-$("btnDemo").addEventListener("click",()=>{demo=JSON.parse(JSON.stringify(DEMO));render();$("demoBar").scrollIntoView({block:"nearest",behavior:"smooth"});});
-$("btnMine").addEventListener("click",()=>{demo=null;render();});
+box.addEventListener("change",e=>{const t=e.target;if(!t.matches("input[type=checkbox]")||demo)return;
+  (mine[t.dataset.a]=mine[t.dataset.a]||[])[+t.dataset.i]=t.checked?1:0;undo=null;save();render();});
+let shown=false;
+/* 화면을 바꾸면 맨 위로. 직전 휠 스크롤이 몇 px 남아 밀어도 0.5초 동안은 맨 위로 되돌려요 */
+function toTop(){
+  const top=()=>window.scrollTo({top:0,left:0,behavior:"instant"});top();
+  const f=()=>{if(scrollY>0&&scrollY<80)top();};
+  addEventListener("scroll",f,{passive:true});setTimeout(()=>removeEventListener("scroll",f),500);
+}
+function go(r){shown=r;render();toTop();if(r)$("rHead").focus({preventScroll:true});}
+/* 모두 지우기 = 바로 지우고 「되돌리기」를 남겨요 */
+$("btnReset").addEventListener("click",()=>{
+  const any=Object.values(mine).some(v=>Array.isArray(v)&&v.some(Boolean));
+  if(!any)return;/* 지울 게 없으면 되돌리기는 그대로 둬요 */
+  undo=JSON.parse(JSON.stringify(mine));mine={};save();render();});
+$("btnUndo").addEventListener("click",()=>{if(undo){mine=undo;undo=null;save();render();}});
+/* 예시 = 체크 화면에 예시를 채워 보여 줘요. 내 체크는 그대로 보관, 예시 중엔 칸이 잠겨요 */
+$("btnDemo").addEventListener("click",()=>{demo=JSON.parse(JSON.stringify(DEMO));undo=null;go(false);});
+$("btnDemoOff").addEventListener("click",()=>{demo=null;go(false);});
+$("btnShow").addEventListener("click",()=>go(true));
+$("btnMine").addEventListener("click",()=>{demo=null;go(false);});
+$("btnAgain").addEventListener("click",()=>{demo=null;go(false);});
 
 /* 오각형(레이더) 그래프 */
 const CX=150,CY=160,R=108;
@@ -374,49 +502,52 @@ function drawRadar(res,on){
   }
   AREAS.forEach((a,i)=>{const[x,y]=pt(i,6.2);const r=res[i];
     const anchor=Math.abs(x-CX)<4?"middle":x>CX?"start":"end";
-    const sub=a.k==="ai"?"계산 제외"+(on&&!r.none?` · ${r.n}개`:""):(!on?"":(r.none?"기록 없음":`${r.g} · ${r.n}개`));
+    const sub=a.k==="ai"?"제외":(!on?"":(r.none?"기록 없음":r.g));
     const dy=i===0?-14:0;
-    h+=`<text x="${x}" y="${y+dy}" text-anchor="${anchor}" font-size="19" font-weight="800" fill="var(--ink)">${a.n}</text>`;
-    if(sub)h+=`<text x="${x}" y="${y+dy+19}" text-anchor="${anchor}" font-size="15.5" font-weight="700" fill="${r.none||a.k==="ai"?"var(--muted)":`var(--g${r.g})`}">${sub}</text>`;
+    h+=`<text x="${x}" y="${y+dy}" text-anchor="${anchor}" font-size="21" font-weight="800" fill="var(--ink)">${a.n}</text>`;
+    if(sub)h+=`<text x="${x}" y="${y+dy+21}" text-anchor="${anchor}" font-size="17.5" font-weight="700" fill="${r.none||a.k==="ai"?"var(--muted)":`var(--g${r.g})`}">${sub}</text>`;
   });
   if(!on)h+=`<text x="${CX}" y="${CY+6}" text-anchor="middle" font-size="16" font-weight="500" fill="var(--muted)">체크하면 모양이 그려져요</text>`;
   $("radar").innerHTML=h;
 }
 
 function render(){
+  $("vCheck").hidden=shown;$("vResult").hidden=!shown;
   const s=view(),none=s.none||[];
-  const on=!!s.touched||AREAS.some(a=>(s[a.k]||[]).some(Boolean));
-  $("demoBar").classList.toggle("on",!!demo);
   const res=AREAS.map(a=>{const arr=s[a.k]||[];const n=a.q.filter((_,i)=>arr[i]).length;return{a,arr,n,g:grade(n),none:none.includes(a.k)};});
+  res.forEach(r=>{const a=r.a;
+    a.q.forEach((_,i)=>{const el=$(a.k+"-"+i);el.checked=!!r.arr[i];el.disabled=!!demo;});
+    $("c-"+a.k).textContent=r.none?"예시 기록 없음":`「예」 ${r.n} / 5`;
+    $("nn-"+a.k).hidden=!r.none;
+  });
+  $("demoCheck").classList.toggle("on",!!demo);
+  $("btnDemo").hidden=!!demo;$("btnReset").disabled=!!demo;
+  $("undoBox").hidden=!undo||!!demo;$("saveNote").hidden=!!undo||!!demo;
+  $("btnShow").textContent=demo?"예시 결과 보기":"진단 결과 보기";
+  if(!shown)return;
   /* 도장 = AI 뺀 네 영역 중 가장 낮은 등급 */
   const four=res.filter(r=>r.a.k!=="ai"&&!r.none);
-  const G=four.length?four.map(r=>r.g).sort((x,y)=>ORDER.indexOf(x)-ORDER.indexOf(y))[0]:null;
-  const P=on?pickPattern(res):null;
-
-  res.forEach(r=>{const a=r.a;
-    a.q.forEach((_,i)=>{$(a.k+"-"+i).checked=!!r.arr[i];});
-    const ge=$("g-"+a.k);
-    if(r.none){ge.textContent="–";ge.className="g gN";$("d-"+a.k).textContent="예시 기록이 없는 영역이에요.";}
-    else{ge.textContent=on?r.g:"?";ge.className="g "+(on?"g"+r.g:"gN");$("d-"+a.k).textContent=on?r.a.diag[r.g]:"체크하면 이 영역 상태가 한 줄로 떠요.";}
-    $("c-"+a.k).textContent=`「예」 ${r.n} / 5`;
-    $("area-"+a.k).classList.toggle("low",!!P&&P.k===a.k);
-  });
-  drawRadar(res,on);
-
-  const st=$("cStamp");
-  if(!on||!P){st.textContent="?";st.className="stamp";$("cTitle").textContent="아직 체크 전이에요";
-    $("cScene").textContent="아래 칸을 체크하면 결과가 여기에 떠요.";
-    $("cWhy").textContent="목표 → 조직 → 표준 → 업무 중 어디가 막혔는지 보여 드려요.";
-    $("cSys").textContent="체크하면 알려 드려요";$("cMsg").textContent="";
-    renderGrades(null);
-    $("ctaTop").textContent="체크가 어려우시면 상담에서 같이 채워 봐도 돼요.";
-    $("ctaFit").textContent="체크를 마치면 우리 회사에 맞는 순서를 여기서 알려 드려요.";return;}
-  st.textContent=G;st.className="stamp g"+G;
+  const G=four.length?four.map(r=>r.g).sort((x,y)=>ORDER.indexOf(x)-ORDER.indexOf(y))[0]:"F";
+  const P=pickPattern(res);
+  const lowR=res.slice(0,4).filter(r=>!r.none&&(r.g==="C"||r.g==="F"));
+  const bR=res.slice(0,4).filter(r=>!r.none&&r.n<5);
+  const x={ai:res[4],bNames:bR.map(r=>r.a.n).join("·"),bKey:bR.length?bR[0].a.k:"ai",bGap:bR.length?firstGap(bR[0].arr):0,aiGap:firstGap(res[4].arr)??0,aiUse:[0,2,3,4].some(i=>res[4].arr[i]),lowG:lowR.length&&lowR.every(r=>r.g==="F")?"F":"C",
+    /* C 영역 장면 = 처음 빈 칸 번호(표준은 매뉴얼 칸 체크면 M) */
+    has:(k,...ii)=>{const a=res.find(r=>r.a.k===k).arr;return ii.some(i=>!!a[i]);},
+    cv:lowR.length?(lowR[0].a.k==="std"&&lowR[0].arr[2]?"M":firstGap(lowR[0].arr)):0};
+  const v=f=>{if(typeof f==="function")return f(x);if(f&&typeof f==="object"){const g=f[x.lowG];return g&&typeof g==="object"?g[x.cv]:g;}return f;};
+  $("demoBar").classList.toggle("on",!!demo);
+  $("rows").innerHTML=res.map(r=>`<div class="rw"><span class="g ${r.none?"gN":"g"+r.g}">${r.none?"–":r.g}</span><span><b>${r.a.n}</b><span class="cnt">${r.none?"기록 없음":`「예」 ${r.n} / 5`}${r.a.k==="ai"?" · 계산 제외":""}</span></span><p>${rowText(r)}</p></div>`).join("");
+  drawRadar(res,true);
+  const st=$("cStamp");st.textContent=G;st.className="stamp g"+G;
   $("cTitle").textContent=P.t;
-  $("cScene").textContent=P.s;
-  $("cWhy").textContent=P.w;
-  $("cSys").textContent=SYS[P.k||"ai"];$("cMsg").textContent=P.f;
-  $("ctaTop").textContent=P.c;$("ctaFit").textContent=P.c;
+  $("cScene").textContent=v(P.s);
+  $("cWhy").textContent=v(P.w)+(P.low&&!res[4].none&&res[4].n>=3?AIPLUS:"");
+  $("cLab").textContent=P.lab||"지금 먼저 잡을 것";
+  $("cSys").textContent=SYS[v(P.k)];$("cMsg").textContent=v(P.f);
+  $("hCta").textContent=P.h||(P.wide?"더 넓혀 보고 싶다면":"혼자 채우기 어렵다면");
+  $("ctaFit").textContent=v(P.c);
+  $("ctaLine").textContent=P.wide?"1:1 무료 상담에서 이 결과를 같이 보고 다음에 맡길 일을 골라요.":"1:1 무료 상담에서 이 결과를 같이 보고 순서를 정해요.";
   renderGrades(G);
 }
 function renderGrades(cur){
