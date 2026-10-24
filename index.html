@@ -2,196 +2,314 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="다섯 영역 25칸을 체크하면 우리 회사 AI 업무 시스템 등급과, 지금 먼저 잡을 시스템이 나와요.">
 <meta property="og:title" content="AI 업무 시스템 진단">
-<meta property="og:description" content="다섯 영역 25칸을 체크하면 우리 회사 등급과, 지금 먼저 잡을 시스템이 나와요.">
 <meta property="og:type" content="website">
+<meta name="color-scheme" content="light">
 <title>AI 업무 시스템 진단</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
 <style>
-/* 두 화면. 체크 화면: 제목 → 다섯 영역 체크 카드 → 「진단 결과 보기」. 결과 화면: 등급 → 오각형·영역별 등급 → 벌어질 일·이유·먼저 잡을 것 → 등급 표 → 상담 → 체크 다시 하기 */
+/* ── 심플키 디자인 시스템 토큰 (~/Documents/simplekey-design-import/tokens 그대로) ── */
 :root{
-  --bg:#f2f3ef;--card:#ffffff;--ink:#1a1a1a;--muted:#4a4a4a;--line:#c8ccc3;
-  --accent:#0f5c48;--on-accent:#ffffff;--accent-soft:#e1efe9;--fill:rgba(15,92,72,.16);--ring:#dfe2da;
-  --gA:#0a7a4a;--gB:#1a5fc4;--gC:#9c5700;--gF:#c0261b;
-  --font:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+--brown:#231815;--orange:#E87200;--orange-hover:#C55F00;--orange-tint:#FBE4CE;--cream:#F5F0EA;--white:#FFFFFF;
+--g50:#FAF8F5;--g100:#F5F0EA;--g200:#EBE3D8;--g300:#DCD1C1;--g400:#C3B4A0;--g500:#A6947C;--g600:#8A785F;--g700:#6E5D48;--g800:#524335;--g900:#372C22;--g950:#231815;
+--success:#2E7D5B;--success-bg:#EBF6F0;--danger:#C0392B;--danger-bg:#FCECEA;
+--orange-bright:#FF8A1F;--text-on-dark-muted:rgba(255,255,255,.68);
+--surface-page:var(--cream);--surface-card:var(--white);--surface-subtle:var(--g50);
+--text-title:var(--brown);--text-body:var(--g700);--text-muted:var(--g600);
+--border-subtle:var(--g200);--border-strong:var(--g300);--focus-ring:rgba(232,114,0,.35);
+--font-sans:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
+--size-h1:42px;--size-h2:32px;--size-h3:28px;--size-h4:24px;--size-body-l:20px;--size-body:18px;--size-caption:16px;
+--ls-tight:-.02em;--ls-title:-.01em;--ls-caption:.08em;
+--sp-0-5:4px;--sp-1:8px;--sp-2:16px;--sp-3:24px;--sp-4:32px;--sp-6:48px;--sp-10:80px;
+--container:1200px;--container-narrow:760px;
+--r-input:8px;--r-card:16px;--r-panel:20px;--r-pill:999px;--bw-control:1.5px;--bw-accent:3px;
+--shadow-card:0 1px 3px rgba(35,24,21,.05);--shadow-card-hover:0 8px 24px rgba(35,24,21,.09);--shadow-cta:0 4px 12px rgba(232,114,0,.28);--shadow-pop:0 16px 40px rgba(35,24,21,.14);
+--ease-out:cubic-bezier(.22,.61,.36,1);--dur-fast:120ms;--dur-base:200ms;--dur-slow:320ms;--dur-reveal:520ms;--press-scale:.985;
+/* 등급 색 = 시맨틱 토큰에서 (파랑·보라 금지) */
+--gA:var(--success);--gB:var(--g800);--gC:var(--orange-hover);--gF:var(--danger);
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0f1110;--card:#1a1d1b;--ink:#f4f6f3;--muted:#cdd2cc;--line:#464c47;
-  --accent:#5fd9a6;--on-accent:#0f1110;--accent-soft:#1f3a2f;--fill:rgba(95,217,166,.22);--ring:#2f3531;
-  --gA:#5fd9a6;--gB:#82b6ff;--gC:#ffc04d;--gF:#ff8d7d;color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#0f1110;--card:#1a1d1b;--ink:#f4f6f3;--muted:#cdd2cc;--line:#464c47;
-  --accent:#5fd9a6;--on-accent:#0f1110;--accent-soft:#1f3a2f;--fill:rgba(95,217,166,.22);--ring:#2f3531;
-  --gA:#5fd9a6;--gB:#82b6ff;--gC:#ffc04d;--gF:#ff8d7d;color-scheme:dark}
-*{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.6;margin:0;-webkit-text-size-adjust:100%;word-break:keep-all;overflow-wrap:anywhere}
-.wrap{max-width:980px;margin:0 auto;padding-block:24px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:20px}
-h1{font-weight:800;font-size:clamp(26px,5vw,34px);line-height:1.25;margin:0;letter-spacing:-.02em;text-wrap:balance}
-h2,h3{margin:0}
-.sub{color:var(--muted);font-size:17px;margin:6px 0 0}
-.bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
-.bar .note{font-size:15px;color:var(--muted)}
-button{font:inherit;font-size:16px;font-weight:500;min-height:44px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 18px;cursor:pointer}
-button.pri{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:700}
-button:hover{border-color:var(--accent)}
-button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-.demo{display:none;background:var(--accent-soft);border-radius:12px;padding:10px 14px;font-size:16px;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-.demo.on{display:flex}
-.nonote{font-size:15px;font-weight:700;color:var(--muted);background:var(--ring);border-radius:8px;padding:6px 10px}
-label.q:has(input:disabled){cursor:default}
-button:disabled{opacity:.5;cursor:default}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--surface-page);color:var(--text-body);font:400 var(--size-body)/1.6 var(--font-sans);-webkit-font-smoothing:antialiased;word-break:keep-all;overflow-wrap:anywhere}
+h1,h2,h3,p{margin:0}
+h1,h2,h3{color:var(--text-title);letter-spacing:var(--ls-tight)}
+button{font-family:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+[hidden]{display:none!important}
 
-/* 결과 판 */
-.view[hidden]{display:none}
-.view{display:grid;gap:20px}
-.board{background:var(--card);border:1.5px solid var(--line);border-radius:18px;padding:20px;display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:24px;align-items:center}
-.head{background:var(--card);border:1.5px solid var(--line);border-radius:18px;padding:20px}
-.head:focus{outline:none}
-.rows{display:grid;gap:8px;min-width:0}
-.rw{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
-.rw:first-child{border-top:0}
-.rw .g{font-size:20px;min-width:40px}
-.rw b{font-size:17px;font-weight:800}
-.rw .cnt{font-weight:500;color:var(--muted);margin-left:6px}
-.rw p{grid-column:1/-1;margin:0;font-size:15px;color:var(--muted)}
-.three{display:grid;gap:12px}
-.again{display:flex;justify-content:flex-start}
-.finish{display:grid;gap:8px;justify-items:start}
-.finish button{min-height:52px;font-size:18px;padding:10px 28px}
-.finish .hint{font-size:15px;color:var(--muted)}
+/* ── 공통 부품 ── */
+.shell{min-height:100dvh;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-2);padding:14px max(16px,env(safe-area-inset-left)) 14px max(16px,env(safe-area-inset-right));max-width:var(--container);width:100%;margin:0 auto}
+.mark{font:800 15px/1 var(--font-sans);letter-spacing:.14em;color:var(--brown)}
+.mark i{font-style:normal;color:var(--orange)}
+.save{font-size:14px;color:var(--text-muted)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--sp-1);min-height:52px;padding:14px 28px;border-radius:var(--r-pill);font:700 var(--size-body)/1 var(--font-sans);letter-spacing:var(--ls-title);text-decoration:none;border:var(--bw-control) solid transparent;transition:background-color var(--dur-base) var(--ease-out),color var(--dur-base) var(--ease-out),border-color var(--dur-base) var(--ease-out),transform var(--dur-fast) var(--ease-out);white-space:nowrap}
+.btn:active{transform:scale(var(--press-scale))}
+.btn.pri{background:var(--orange);border-color:var(--orange);color:var(--white);box-shadow:var(--shadow-cta)}
+.btn.pri:hover{background:var(--orange-hover);border-color:var(--orange-hover)}
+.btn.sec{background:var(--white);border-color:var(--brown);color:var(--brown)}
+.btn.sec:hover{background:var(--brown);color:var(--white)}
+.btn.ghost{background:transparent;border-color:var(--border-strong);color:var(--text-body)}
+.btn.ghost:hover{border-color:var(--brown);color:var(--brown)}
+.btn.lg{min-height:60px;font-size:var(--size-body-l);padding:18px 36px}
+.btn.full{width:100%}
+.eyebrow{font:700 13px/1 var(--font-sans);letter-spacing:.14em;color:var(--orange)}
+.card{background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:var(--r-card);box-shadow:var(--shadow-card)}
+.screen{flex:1;width:100%;max-width:var(--container-narrow);margin:0 auto;padding:var(--sp-2) max(16px,env(safe-area-inset-right)) var(--sp-6) max(16px,env(safe-area-inset-left))}
+.enter{animation:rise var(--dur-reveal) var(--ease-out) both}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+/* ── 1. 시작 화면 ── */
+.start{display:grid;gap:var(--sp-4);padding-top:var(--sp-3)}
+.start h1{font:700 clamp(34px,8.4vw,var(--size-h1))/1.3 var(--font-sans);letter-spacing:-.03em}
+.start h1 em{font-style:normal;color:var(--orange)}
+.lead{font-size:var(--size-body);color:var(--text-body);margin-top:var(--sp-2)}
+.penta{display:grid;grid-template-columns:150px 1fr;gap:var(--sp-3);align-items:center;padding:var(--sp-3)}
+.penta svg{width:150px;height:auto;display:block}
+.alist{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.alist li{display:grid;grid-template-columns:44px 1fr;gap:10px;align-items:baseline;font-size:15px;line-height:1.45}
+.alist b{font:700 16px/1.2 var(--font-sans);color:var(--brown)}
+.rule{display:flex;gap:10px;align-items:flex-start;font-size:16px;line-height:1.55;color:var(--text-body);padding:14px var(--sp-2);border-radius:var(--r-input);background:var(--surface-subtle);border:1px solid var(--border-subtle)}
+.rule b{color:var(--brown)}
+.acts{display:grid;gap:12px}
+.meta{font-size:14px;color:var(--text-muted);text-align:center}
+
+/* ── 2. 질문 화면 ── */
+.qtop{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:var(--sp-1);margin-bottom:var(--sp-1)}
+.back{width:44px;height:44px;border-radius:var(--r-pill);border:0;background:transparent;color:var(--brown);font-size:22px;display:grid;place-items:center}
+.back:hover{background:var(--g200)}
+.back:disabled{opacity:.3;cursor:default;background:transparent}
+.count{font:700 16px/1 var(--font-sans);color:var(--brown);font-variant-numeric:tabular-nums}
+.count span{color:var(--orange)}
+.count small{color:var(--text-muted);font-weight:600}
+/* 진행 막대 = 다섯 영역 칸 */
+.track{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.seg{display:grid;gap:6px}
+.seg .bar{height:6px;border-radius:var(--r-pill);background:var(--g200);overflow:hidden}
+.seg .bar i{display:block;height:100%;width:0;background:var(--orange);border-radius:inherit;transition:width var(--dur-slow) var(--ease-out)}
+.seg .nm{font:600 12px/1 var(--font-sans);color:var(--g500);text-align:center;transition:color var(--dur-base) var(--ease-out)}
+.seg.on .nm{color:var(--brown)}
+.seg.fin .nm{color:var(--g700)}
+.qbody{display:grid;gap:var(--sp-3);padding-top:var(--sp-6)}
+.chip{display:inline-flex;align-items:center;gap:8px;justify-self:start;padding:7px 14px;border-radius:var(--r-pill);background:var(--white);border:1px solid var(--border-strong);font:600 14px/1 var(--font-sans);color:var(--g800)}
+.chip .lv{color:var(--orange)}
+.chip .dot{width:4px;height:4px;border-radius:50%;background:var(--g400)}
+.qtext{font:700 clamp(24px,6.3vw,var(--size-h3))/1.4 var(--font-sans);letter-spacing:-.025em;color:var(--brown);text-wrap:balance}
+.gloss{font-size:16px;color:var(--text-muted);margin-top:-14px}
+.crit{font-size:15px;line-height:1.5;color:var(--text-body);border-left:var(--bw-accent) solid var(--g300);padding:2px 0 2px 12px}
+.crit b{color:var(--brown);font-weight:600}
+.ans{display:grid;gap:12px;margin-top:var(--sp-1)}
+.opt{display:flex;align-items:center;gap:var(--sp-2);width:100%;min-height:76px;padding:var(--sp-2) var(--sp-3);border-radius:var(--r-card);border:var(--bw-control) solid var(--border-subtle);background:var(--white);text-align:left;color:var(--brown);box-shadow:var(--shadow-card);transition:border-color var(--dur-base) var(--ease-out),background-color var(--dur-base) var(--ease-out),transform var(--dur-fast) var(--ease-out),box-shadow var(--dur-base) var(--ease-out)}
+.opt:hover{border-color:var(--border-strong);box-shadow:var(--shadow-card-hover);transform:translateY(-2px)}
+.opt:active{transform:scale(var(--press-scale))}
+.opt .k{flex:0 0 auto;width:36px;height:36px;border-radius:50%;border:var(--bw-control) solid var(--border-strong);display:grid;place-items:center;font:700 15px/1 var(--font-sans);color:var(--g600);transition:all var(--dur-base) var(--ease-out)}
+.opt .l{display:grid;gap:2px}
+.opt .l b{font:700 var(--size-body-l)/1.3 var(--font-sans);letter-spacing:var(--ls-title)}
+.opt .l small{font-size:15px;color:var(--text-muted)}
+.opt[aria-pressed="true"]{border-color:var(--orange);background:#FEF6EE}
+.opt[aria-pressed="true"] .k{background:var(--orange);border-color:var(--orange);color:var(--white)}
+.qfoot{display:flex;justify-content:center;margin-top:var(--sp-4)}
+.link{background:none;border:0;padding:10px 4px;font:600 15px/1.4 var(--font-sans);color:var(--text-muted);text-decoration:underline;text-underline-offset:3px}
+.link:hover{color:var(--brown)}
+.slide{animation:qin var(--dur-slow) var(--ease-out) both}
+@keyframes qin{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
+.slide.backward{animation-name:qback}
+@keyframes qback{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:none}}
+
+/* ── 3. 다 본 화면 ── */
+.done{display:grid;gap:var(--sp-3);justify-items:center;text-align:center;padding-top:var(--sp-10)}
+.done .tick{width:72px;height:72px;border-radius:50%;background:var(--orange);color:var(--white);display:grid;place-items:center;font:800 34px/1 var(--font-sans);box-shadow:var(--shadow-cta)}
+.done h1{font:700 var(--size-h3)/1.35 var(--font-sans)}
+.done p{color:var(--text-body)}
+.done .acts{width:100%;max-width:420px}
+
+/* ── 4. 결과 화면 ── */
+.result{max-width:1040px;display:grid;gap:var(--sp-3);padding-bottom:120px}
+.demo{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:12px var(--sp-2);border-radius:var(--r-input);background:var(--orange-tint);color:var(--brown);font-size:15px}
+.demo .btn{min-height:40px;padding:8px 16px;font-size:15px}
+.hero{background:var(--g950);border-radius:var(--r-panel);padding:var(--sp-4) var(--sp-3);display:grid;grid-template-columns:auto 1fr;gap:var(--sp-3);align-items:center;color:var(--white);box-shadow:var(--shadow-pop);position:relative;overflow:hidden}
+.hero:focus{outline:none}
+.seal{width:112px;height:112px;border-radius:50%;border:3px solid var(--orange-bright);display:grid;place-items:center;position:relative}
+.seal::after{content:"";position:absolute;inset:7px;border-radius:50%;border:1px solid rgba(255,138,31,.45)}
+.seal b{font:800 60px/1 var(--font-sans);color:var(--orange-bright);letter-spacing:-.04em}
+.hero .lab{font:600 14px/1 var(--font-sans);letter-spacing:var(--ls-caption);color:var(--text-on-dark-muted)}
+.hero h1{color:var(--white);font:700 clamp(23px,5.6vw,var(--size-h3))/1.4 var(--font-sans);letter-spacing:-.025em;margin-top:10px;text-wrap:balance}
+.hero .gs{margin-top:12px;font-size:15px;color:var(--text-on-dark-muted)}
+.hero .gs b{color:var(--white);font-weight:600}
+.board{padding:var(--sp-3);display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:var(--sp-4);align-items:center}
 .radar{width:100%;max-width:340px;height:auto;display:block;margin:0 auto}
-.radar text{font-family:var(--font)}
-.res{display:grid;gap:16px;min-width:0}
-.headline{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center}
-.stamp{width:88px;height:88px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:46px;line-height:1;border:5px solid currentColor;transform:rotate(-6deg);color:var(--muted)}
-.lab{font-size:15px;font-weight:500;color:var(--muted)}
-.big{font-weight:800;font-size:23px;line-height:1.35;margin:2px 0 0;text-wrap:balance}
-.box{border-radius:12px;padding:12px 14px;display:grid;gap:4px;border:1.5px solid var(--line)}
-.box h3{font-size:15px;color:var(--muted);font-weight:700}
-.box p{margin:0;font-size:17px;font-weight:500}
-.box.first{background:var(--accent-soft);border-color:var(--accent)}
-.box.first h3{color:var(--ink)}
-.box.first .sys{font-size:24px;font-weight:800;line-height:1.3}
-.box.first p{font-weight:700}
+.radar text{font-family:var(--font-sans)}
+.rows{display:grid;min-width:0}
+.rw{display:grid;grid-template-columns:44px 1fr;gap:4px 14px;padding:14px 0;border-top:1px solid var(--border-subtle)}
+.rw:first-child{border-top:0;padding-top:0}
+.rw .gd{grid-row:span 2;width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font:800 22px/1 var(--font-sans);color:var(--white)}
+.rw .nm{font:700 17px/1.3 var(--font-sans);color:var(--brown)}
+.rw .nm span{font-weight:500;font-size:14px;color:var(--text-muted);margin-left:6px}
+.rw p{font-size:15px;line-height:1.55;color:var(--text-body)}
+.bgA{background:var(--gA)}.bgB{background:var(--gB)}.bgC{background:var(--gC)}.bgF{background:var(--gF)}.bgN{background:var(--g300)}
+.say{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2)}
+.say .card{padding:var(--sp-3);display:grid;gap:10px;align-content:start}
+.say h2,.first h2{font:600 14px/1 var(--font-sans);letter-spacing:var(--ls-caption);color:var(--text-muted)}
+.say p{font-size:17px;line-height:1.65;color:var(--brown);font-weight:500}
+.first{position:relative;padding:var(--sp-4) var(--sp-3) var(--sp-3);display:grid;gap:12px;overflow:hidden;border-color:var(--border-strong)}
+.first::before{content:"";position:absolute;left:0;right:0;top:0;height:var(--bw-accent);background:var(--orange)}
+.first h2{color:var(--orange)}
+.first .sys{font:800 clamp(28px,7vw,var(--size-h2))/1.25 var(--font-sans);letter-spacing:-.03em;color:var(--brown)}
+.first p{font-size:var(--size-body);line-height:1.65;color:var(--text-body)}
+.gsec{padding:var(--sp-3);display:grid;gap:var(--sp-2)}
+.gsec h2{font:700 var(--size-h4)/1.4 var(--font-sans)}
+.gt{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.gr{border:var(--bw-control) solid var(--border-subtle);border-radius:12px;padding:14px;display:grid;gap:8px;align-content:start}
+.gr .gd{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;color:var(--white);font:800 18px/1 var(--font-sans)}
+.gr .n{font:700 15px/1.3 var(--font-sans);color:var(--brown)}
+.gr .now{display:inline-block;margin-left:6px;font:700 12px/1 var(--font-sans);color:var(--orange)}
+.gr p{font-size:14px;line-height:1.5;color:var(--text-body)}
+.gr.cur{border-color:var(--orange);background:#FEF6EE}
+.cta{background:var(--g950);border-radius:var(--r-panel);padding:var(--sp-6) var(--sp-4);display:grid;gap:12px;justify-items:center;text-align:center}
+.cta h2{color:var(--white);font:700 clamp(24px,6vw,var(--size-h2))/1.35 var(--font-sans)}
+.cta p{color:var(--text-on-dark-muted);font-size:17px;max-width:560px}
+.cta p.fit{color:var(--white)}
+.cta .btn{margin-top:var(--sp-2)}
+.again{display:flex;justify-content:center}
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:5;padding:12px max(16px,env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));background:rgba(245,240,234,.96);border-top:1px solid var(--border-subtle);display:none;gap:10px;transform:translateY(110%);transition:transform var(--dur-slow) var(--ease-out)}
+.dock.show{transform:none}
+.dock .btn{min-height:52px}
+.dock .btn.sec{flex:0 0 auto;padding:14px 20px}
+.dock .btn.pri{flex:1}
+.reveal{opacity:0;transform:translateY(16px);transition:opacity var(--dur-reveal) var(--ease-out),transform var(--dur-reveal) var(--ease-out)}
+.reveal.in{opacity:1;transform:none}
 
-/* 영역 카드 */
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:16px}
-.area{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:16px;display:grid;gap:10px;min-width:0;align-content:start}
-.area.low{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
-.ahead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
-.ahead h2{font-size:21px;font-weight:800}
-.ahead .what{display:block;font-size:15px;color:var(--muted);font-weight:400;margin-top:2px}
-.g{font-weight:800;font-size:24px;min-width:42px;text-align:center;border:3px solid currentColor;border-radius:10px;padding:0 8px;line-height:1.3}
-.diag{font-size:16px;font-weight:500;background:var(--accent-soft);border-radius:10px;padding:9px 12px}
-.crit{font-size:15px;color:var(--muted)}
-label.q{display:grid;grid-template-columns:24px 1fr;gap:10px;align-items:start;cursor:pointer;padding:10px 2px 8px;border-top:1px solid var(--line)}
-label.q input{width:22px;height:22px;margin:2px 0 0;accent-color:var(--accent)}
-.qt{min-width:0}
-.lv{display:inline-block;font-size:13.5px;font-weight:700;color:var(--ink);background:var(--ring);border-radius:6px;padding:0 7px;margin-right:6px;white-space:nowrap}
-.gl{color:var(--muted);font-size:15px}
-.cnt{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums}
-
-/* 등급 표 */
-.sec{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:16px;display:grid;gap:10px}
-.sec h2{font-size:19px;font-weight:800}
-.gt{display:grid;gap:6px}
-.gr{display:grid;grid-template-columns:48px 1fr;gap:12px;align-items:center;padding:8px 10px;border-radius:12px;border:1.5px solid transparent}
-.gr.cur{border-color:var(--accent);background:var(--accent-soft)}
-.gr .g{font-size:21px}
-.gr .n{font-size:15px;font-weight:700}
-.gr p{margin:0;font-size:16px}
-
-.cta{border-top:1.5px solid var(--line);padding:20px 4px 0;display:grid;gap:6px;justify-items:start}
-.cta h2{font-size:21px;font-weight:800}
-.cta p{margin:0;font-size:17px;text-wrap:pretty;max-width:680px}
-a.go{display:inline-flex;align-items:center;min-height:48px;margin-top:8px;background:var(--accent);color:var(--on-accent);font-weight:700;font-size:17px;text-decoration:none;border-radius:999px;padding:10px 24px}
-a.go:hover{filter:brightness(1.1)}
-
-.gA{color:var(--gA)}.gB{color:var(--gB)}.gC{color:var(--gC)}.gF{color:var(--gF)}.gN{color:var(--muted)}
-@media (max-width:680px){.board{grid-template-columns:1fr;padding:16px;gap:16px}.head{padding:16px}.stamp{width:76px;height:76px;font-size:40px}.big{font-size:21px}}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media (max-width:760px){
+  .board{grid-template-columns:1fr;gap:var(--sp-3);padding:var(--sp-3) var(--sp-2)}
+  .say{grid-template-columns:1fr}
+  .gt{grid-template-columns:1fr 1fr}
+  .hero{grid-template-columns:1fr;justify-items:start;padding:var(--sp-4) var(--sp-3)}
+  .seal{width:92px;height:92px}.seal b{font-size:50px}
+  .cta{padding:var(--sp-4) var(--sp-3)}
+  .dock{display:flex}
+  .penta{grid-template-columns:1fr;justify-items:center}
+  .penta svg{width:170px}
+  .alist{width:100%}
+}
+@media (min-width:761px){
+  .ans{grid-template-columns:1fr 1fr}
+  .qbody{padding-top:var(--sp-10)}
+  .start{padding-top:var(--sp-6)}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}
 </style>
 </head>
 <body>
+<div class="shell">
+  <header class="top">
+    <span class="mark">SIMPLE KEY<i>.</i></span>
+    <span class="save" id="saveNote">이 브라우저에만 저장돼요</span>
+  </header>
 
-<div class="wrap">
-  <!-- 화면 1: 체크 -->
-  <div class="view" id="vCheck">
-    <header>
-      <h1>AI 업무 시스템 진단</h1>
-      <p class="sub">지금 실제로 그렇게 하고 있는 칸만 체크해요. 반쯤이면 체크하지 않아요.</p>
-    </header>
-    <div class="demo" id="demoCheck" role="status">
-      <span><b>예시 회사 · 유아용품 브랜드(작은 팀)</b>의 체크예요. 예시를 보는 동안은 칸이 잠기고, 내 체크는 그대로 보관돼요.</span>
-      <button type="button" id="btnDemoOff">내 체크로 돌아가기</button>
+  <!-- 1. 시작 -->
+  <main class="screen" id="sStart">
+    <div class="start enter">
+      <div>
+        <div class="eyebrow">25문항 · 다섯 영역</div>
+        <h1 style="margin-top:14px">AI <em>업무 시스템</em> 진단</h1>
+        <p class="lead">다섯 영역 25칸을 체크하면 우리 회사 AI 업무 시스템 등급과, 지금 먼저 잡을 시스템이 나와요.</p>
+      </div>
+      <section class="card penta" aria-label="다섯 영역">
+        <svg viewBox="0 0 160 152" aria-hidden="true" id="miniPenta"></svg>
+        <ul class="alist" id="areaList"></ul>
+      </section>
+      <p class="rule"><span aria-hidden="true" style="color:var(--orange);font-weight:800">✓</span><span>지금 <b>실제로 그렇게 하고 있을 때만 「예」</b>예요. 반쯤이면 「아니오」예요.</span></p>
+      <div class="acts">
+        <button class="btn pri lg full" id="btnStart" type="button">진단 시작하기 <span aria-hidden="true">→</span></button>
+        <button class="btn ghost full" id="btnRestart" type="button" hidden>처음부터 다시 하기</button>
+        <button class="btn ghost full" id="btnDemo" type="button">예시로 채워 보기</button>
+      </div>
+      <p class="meta">25문항 · 한 문항에 「예」 또는 「아니오」만 누르면 돼요</p>
     </div>
-    <div class="bar">
-      <button type="button" id="btnDemo">예시로 채워 보기</button>
-      <button type="button" id="btnReset">모두 지우기</button>
-      <span class="note" id="saveNote">체크한 내용은 이 브라우저에만 저장돼요.</span>
-      <span class="note" id="undoBox" role="status" hidden>모두 지웠어요. <button type="button" id="btnUndo">되돌리기</button></span>
-    </div>
-    <div class="grid" id="areas"></div>
-    <div class="finish">
-      <button type="button" class="pri" id="btnShow">진단 결과 보기</button>
-      <span class="hint">다 못 채워도 괜찮아요. 체크한 만큼으로 결과가 나와요.</span>
-    </div>
-  </div>
+  </main>
 
-  <!-- 화면 2: 결과 -->
-  <div class="view" id="vResult" hidden>
-    <div class="demo" id="demoBar" role="status">
+  <!-- 2. 질문 -->
+  <main class="screen" id="sQ" hidden>
+    <div class="qtop">
+      <button class="back" id="btnBack" type="button" aria-label="이전 문항">←</button>
+      <div class="track" id="track" aria-hidden="true"></div>
+      <div class="count" aria-live="polite" id="qCount"></div>
+    </div>
+    <div class="qbody" id="qBody">
+      <span class="chip" id="qChip"></span>
+      <h1 class="qtext" id="qText" tabindex="-1"></h1>
+      <p class="gloss" id="qGloss"></p>
+      <p class="crit" id="qCrit"></p>
+      <div class="ans" role="group" aria-label="답">
+        <button class="opt" type="button" data-v="1" id="optY"><span class="k" aria-hidden="true">Y</span><span class="l"><b>예</b><small>지금 실제로 그렇게 하고 있어요</small></span></button>
+        <button class="opt" type="button" data-v="0" id="optN"><span class="k" aria-hidden="true">N</span><span class="l"><b>아니오</b><small>아직이거나, 반쯤이에요</small></span></button>
+      </div>
+    </div>
+    <div class="qfoot"><button class="link" id="btnEarly" type="button">다 못 채워도 괜찮아요. 여기까지로 결과 보기</button></div>
+  </main>
+
+  <!-- 3. 다 봤어요 -->
+  <main class="screen" id="sDone" hidden>
+    <div class="done enter">
+      <div class="tick" aria-hidden="true">✓</div>
+      <h1 tabindex="-1" id="doneH">25칸을 다 봤어요</h1>
+      <p id="doneP">체크한 만큼으로 결과가 나와요.</p>
+      <div class="acts">
+        <button class="btn pri lg full" id="btnShow" type="button">진단 결과 보기 <span aria-hidden="true">→</span></button>
+        <button class="btn ghost full" id="btnFix" type="button">답 고치기</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- 4. 결과 -->
+  <main class="screen result" id="sR" hidden>
+    <div class="demo" id="demoBar" hidden>
       <span><b>예시 회사 · 유아용품 브랜드(작은 팀)</b> 결과예요.</span>
-      <button type="button" id="btnMine">내 진단으로 돌아가기</button>
+      <button class="btn sec" id="btnMine" type="button">내 진단으로 돌아가기</button>
     </div>
-    <section class="head" id="rHead" tabindex="-1" aria-label="진단 결과">
-      <div class="headline">
-        <div class="stamp" id="cStamp">?</div>
-        <div>
-          <div class="lab">우리 회사 지금 단계</div>
-          <div class="big" id="cTitle"></div>
-        </div>
+    <section class="hero enter" id="rHead" tabindex="-1" aria-label="진단 결과">
+      <div class="seal"><b id="cStamp">?</b></div>
+      <div>
+        <div class="lab">우리 회사 지금 단계</div>
+        <h1 id="cTitle"></h1>
+        <p class="gs" id="cGrade"></p>
       </div>
     </section>
-    <section class="board" aria-label="영역별 등급">
+    <section class="card board reveal" aria-label="영역별 등급">
       <svg class="radar" id="radar" viewBox="-50 -14 400 332" role="img" aria-label="다섯 영역 「예」 개수 오각형 그래프"></svg>
       <div class="rows" id="rows"></div>
     </section>
-    <div class="three">
-      <div class="box">
-        <h3>지금 회사에서 벌어지고 있을 일</h3>
-        <p id="cScene"></p>
-      </div>
-      <div class="box">
-        <h3>왜 그런지</h3>
-        <p id="cWhy"></p>
-      </div>
-      <div class="box first">
-        <h3 id="cLab">지금 먼저 잡을 것</h3>
-        <div class="sys" id="cSys"></div>
-        <p id="cMsg"></p>
-      </div>
+    <div class="say reveal">
+      <section class="card"><h2>지금 회사에서 벌어지고 있을 일</h2><p id="cScene"></p></section>
+      <section class="card"><h2>왜 그런지</h2><p id="cWhy"></p></section>
     </div>
-    <section class="sec" aria-labelledby="hGrade">
+    <section class="card first reveal">
+      <h2 id="cLab">지금 먼저 잡을 것</h2>
+      <div class="sys" id="cSys"></div>
+      <p id="cMsg"></p>
+    </section>
+    <section class="card gsec reveal" aria-labelledby="hGrade">
       <h2 id="hGrade">등급은 「예」 개수로 정해요</h2>
       <div class="gt" id="gradeTable"></div>
     </section>
-    <section class="cta" aria-labelledby="hCta">
+    <section class="cta reveal" id="ctaSec" aria-labelledby="hCta">
       <h2 id="hCta">혼자 채우기 어렵다면</h2>
-      <p id="ctaFit"></p>
+      <p class="fit" id="ctaFit"></p>
       <p id="ctaLine">1:1 무료 상담에서 이 결과를 같이 보고 순서를 정해요.</p>
-      <a class="go" href="https://www.simplekey.kr/?utm_source=facam&amp;utm_medium=diagnosis_tool&amp;utm_campaign=lecture" target="_blank" rel="noopener">1:1 무료 상담 받아 보기</a>
+      <a class="btn pri lg" id="ctaGo" href="https://www.simplekey.kr/?utm_source=facam&amp;utm_medium=diagnosis_tool&amp;utm_campaign=lecture" target="_blank" rel="noopener">1:1 무료 상담 받아 보기 <span aria-hidden="true">→</span></a>
     </section>
-    <div class="again"><button type="button" id="btnAgain">체크 다시 하기</button></div>
-  </div>
+    <div class="again"><button class="btn ghost" id="btnAgain" type="button">체크 다시 하기</button></div>
+  </main>
+</div>
+<div class="dock" id="dock" aria-hidden="true">
+  <button class="btn sec" type="button" id="dockAgain" tabindex="-1">다시 하기</button>
+  <a class="btn pri" href="https://www.simplekey.kr/?utm_source=facam&amp;utm_medium=diagnosis_tool&amp;utm_campaign=lecture" target="_blank" rel="noopener" tabindex="-1">1:1 무료 상담 받아 보기</a>
 </div>
 
 <script>
-/* 문항 = 강의용 간소 진단서 그대로. 문항 줄의 세 번째 칸 = 괄호 풀이 */
+/* ===== 문항·결과 문장·로직: pages/index.html 에서 그대로 복사 (assemble.py, 원본 md5 5f57f33f) ===== */
 const AREAS=[
  {k:"goal",n:"목표",what:"회사 방향과 숫자가 실제 판단 기준인가",crit:"물었을 때 숫자가 바로 나와야 「예」",
   q:[["기초","올해 회사에서 가장 중요하게 만들고 싶은 결과를 분명히 말할 수 있다",""],
@@ -235,39 +353,42 @@ const GRADES={
    G[i] = 위에서부터 처음 비어 있는 칸 i의 뜻(아직 자리 잡지 않음) · D[i] = 그 바로 위(없으면 아래로 가장 가까운) 체크한 칸 i(하고 계심) · A = 다섯 칸 모두.
    영역마다 끝말을 달리 써서, 여러 줄이 같은 말로 반복되지 않게 해요 */
 const ROW={
- goal:{A:"목표를 정하고 점검하고, 이룬 결과를 다음 목표에 반영하고 계세요.",
-  D:["올해 만들고 싶은 결과는 분명히 말씀하실 수 있어요.","꼭 볼 핵심 숫자는 알고 계세요.","이번 달 목표는 담당·기한과 함께 적어 두셨어요.","핵심 숫자는 정기 회의에서 점검하고 계세요.","목표를 이뤘는지 정기적으로 돌아보고 계세요."],
-  G:["올해 가장 중요하게 만들 결과를 한 문장으로 정해 두는 건 아직 자리 잡지 않았어요.","매출·문의처럼 꼭 볼 숫자를 정해 두는 건 아직 자리 잡지 않았어요.","이번 달 목표를 담당·기한과 함께 문서로 두는 건 아직 자리 잡지 않았어요.","핵심 숫자를 정기 회의에서 점검하고 기록하는 건 아직 자리 잡지 않았어요.","이룬 결과를 다음 목표에 반영하는 건 아직 자리 잡지 않았어요."]},
- org:{A:"담당자가 대표 확인 없이 기준대로 끝까지 처리하고 있어요.",
-  D:["업무 영역별 담당은 정해 두셨어요.","직접 할 일과 넘길 일은 구분하고 계세요.","담당자와 책임 범위는 문서로 정해 두셨어요.","직원이 어디까지 정하는지 기준을 세워 두셨어요.","대표 확인 없이 담당자가 끝내는 일도 있어요."],
-  G:["업무 영역을 나누고 누가 맡는지는 아직 정해지지 않았어요.","대표님이 직접 할 일과 넘길 일의 구분은 아직 서지 않았어요.","담당자와 책임 범위를 문서로 남기는 건 아직 비어 있어요.","직원이 어디까지 정하고 어디서 확인받는지는 아직 선이 없어요.","담당자가 대표 확인 없이 끝까지 처리하는 건 아직 자리 잡기 전이에요."]},
- std:{A:"실수가 생기면 매뉴얼까지 바로 고쳐서, 같은 실수가 덜 나요.",
-  D:["반복하는 핵심 업무 목록은 갖고 계세요.","업무마다 순서와 결과물을 말로 설명하실 수 있어요.","절차가 담긴 매뉴얼은 갖고 계세요.","실수·불만이 생겼을 때의 처리 기준은 있으세요.","실수가 생기면 돌아보고 고치는 습관은 있으세요."],
-  G:["반복하는 핵심 업무를 목록으로 뽑는 건 아직 손대기 전이에요.","일마다 순서·담당·결과물을 말로 풀어 두는 건 아직이에요.","절차·체크리스트를 담은 매뉴얼은 아직 만들기 전이에요.","실수·불만이 생겼을 때 누가 무엇을 할지는 아직 정해 두지 않으셨어요.","실수를 돌아보고 매뉴얼에 바로 반영하는 흐름은 아직 붙지 않았어요."]},
- work:{A:"늦어지거나 빠진 일이 한눈에 보이고, 정기적으로 짚어서 손보고 계세요.",
-  D:["진행 중인 일은 한곳에 적어 두고 계세요.","회사 파일의 기본 저장 위치는 정해져 있어요.","업무마다 담당·마감·상태를 적어 두고 계세요.","회의 결정과 담당·기한은 회의록에 남기고 계세요.","늦어진 일은 정기적으로 점검하고 계세요."],
-  G:["진행 중인 일을 한곳에 모아 적는 건 아직 습관으로 붙기 전이에요.","회사 파일의 기본 저장 위치는 아직 정하기 전이에요.","업무마다 담당·마감·상태를 적어 두는 건 아직 습관으로 붙기 전이에요.","회의 결정·담당·기한을 회의록으로 남기는 습관은 아직 붙기 전이에요.","늦어지거나 빠진 일을 정기적으로 짚어 고치는 건 아직 남아 있어요."]},
+ goal:{A:"목표를 세우고, 점검하고, 이룬 걸 다음 목표에 다시 반영하고 계세요.",
+  D:["올해 뭘 만들고 싶은지는 분명하세요.","꼭 봐야 할 숫자는 알고 계세요.","이번 달 목표는 담당·기한까지 적어 두셨어요.","핵심 숫자는 정기 회의에서 챙겨 보고 계세요.","목표를 이뤘는지 주기적으로 돌아보고 계세요."],
+  G:["올해 가장 중요한 결과를 한 문장으로 정해 두진 않으셨어요.","매출이나 문의처럼 꼭 볼 숫자는 아직 안 정하셨어요.","이번 달 목표를 담당·기한까지 적어 두는 건 아직이에요.","핵심 숫자를 회의에서 점검하고 남기는 건 아직 안 하고 계세요.","이룬 결과를 다음 목표에 반영하는 건 아직이에요."]},
+ org:{A:"담당자가 대표님 확인 없이도 기준대로 끝까지 처리하고 있어요.",
+  D:["누가 어떤 일을 맡는지는 정해 두셨어요.","직접 할 일과 넘길 일은 나눠서 보고 계세요.","담당과 책임 범위는 문서로 정해 두셨어요.","맡은 사람이 어디까지 정해도 되는지 기준은 있어요.","대표님 확인 없이 담당자가 끝내는 일은 있어요."],
+  G:["일을 나누고 누가 맡을지는 아직 그때그때 정하세요.","대표님이 직접 할 일과 넘길 일은 아직 안 나누셨어요.","담당과 책임 범위를 문서로 남기진 않으셨어요.","맡은 사람이 어디까지 정하고 언제 대표님께 물을지는 아직 선이 없어요.","확인 없이 끝까지 맡기는 단계는 아직이에요."]},
+ std:{A:"실수가 나면 매뉴얼까지 바로 고쳐서, 같은 실수가 잘 안 나요.",
+  D:["자주 반복하는 일 목록은 있으세요.","일마다 순서와 결과물은 말로 설명하실 수 있어요.","절차가 담긴 매뉴얼은 있으세요.","실수나 불만이 생겼을 때 처리 기준은 있으세요.","실수가 나면 돌아보고 고치는 습관은 있으세요."],
+  G:["반복하는 일을 목록으로 뽑아 놓진 않으셨어요.","일마다 순서·담당·결과물은 아직 정리 전이에요.","절차·체크리스트가 담긴 매뉴얼은 아직 없어요.","실수나 불만이 생겼을 때 누가 뭘 할지는 아직 안 정해 두셨어요.","실수를 돌아보고 매뉴얼을 바로 고치는 흐름은 아직 없어요."]},
+ work:{A:"늦어지거나 빠진 일이 한눈에 보이고, 주기적으로 짚어서 손보고 계세요.",
+  D:["진행 중인 일은 한곳에 적어 두고 계세요.","회사 파일 두는 곳은 정해져 있어요.","일마다 담당·마감·상태는 적어 두고 계세요.","회의에서 정한 건 담당·기한까지 회의록에 남기고 계세요.","늦어진 일은 주기적으로 짚어 보고 계세요."],
+  G:["진행 중인 일을 한곳에 모아 적는 습관은 아직 없으세요.","회사 파일을 어디에 둘지는 아직 안 정해져 있어요.","일마다 담당·마감·상태를 적는 건 아직 습관이 안 됐어요.","회의에서 정한 걸 회의록으로 남기는 습관은 아직 없으세요.","늦어지거나 빠진 일을 정기적으로 짚어 고치는 건 아직 남아 있어요."]},
  ai:{A:"역할을 정해 둔 AI 직원이 반복 업무를 맡아 돌리고 있어요.",
-  D:["AI는 일상 업무에 쓰고 계세요.","AI가 참고할 회사 자료는 일부 모아 두셨어요.","업무별 지시문은 저장해 다시 쓰고 계세요.","맡길 때 목적과 결과물 기준을 같이 주고 계세요.","AI 직원이 맡아 하는 반복 업무도 있어요."],
-  G:["AI를 일상 업무에 두루 쓰는 건 아직 시작 전이에요.","AI가 참고할 회사 자료·기준을 모아 두는 건 아직 시작 전이에요.","업무별 지시문을 저장해 다시 쓰는 건 아직 시작 전이에요.","맡길 때 목적·자료·결과물 기준까지 같이 주는 건 아직 시작 전이에요.","역할이 정해진 AI 직원을 두는 건 아직 시작 전이에요."]}
+  D:["AI는 평소 일에 쓰고 계세요.","AI가 참고할 회사 자료는 조금 모아 두셨어요.","자주 쓰는 지시문은 저장해 두고 다시 쓰세요.","맡길 때 목적과 결과물 기준은 같이 주고 계세요.","AI 직원이 맡아 하는 반복 업무는 있어요."],
+  G:["AI를 매일 일에 쓰는 건 아직 시작 전이에요.","AI가 볼 회사 자료나 기준을 모으는 건 아직 시작 전이에요.","업무별 지시문을 저장해 다시 쓰는 건 아직 시작 전이에요.","맡길 때 목적·자료·결과물 기준까지 주는 건 아직 시작 전이에요.","역할을 정한 AI 직원을 두는 건 아직 시작 전이에요."]}
 };
 const firstGap=arr=>[0,1,2,3,4].find(i=>!arr[i]);
-function rowText(r){
+function rowText(r,first){
   if(r.none)return r.a.k==="ai"?"AI 쪽도 이번 예시에서는 비워 뒀어요.":"예시 기록에 없어서 판단하지 않았어요.";
   const T=ROW[r.a.k];
   if(r.n===5)return T.A;
   const fe=firstGap(r.arr);
   const d=fe>0?fe-1:[1,2,3,4].find(i=>r.arr[i]);
-  return (d!==undefined?T.D[d]+" ":"")+T.G[fe];
+  return d!==undefined?T.D[d]+(first?" 근데 ":" ")+T.G[fe]:T.G[fe];
 }
 /* 회사 문장 = 네 영역(목표·조직·표준·업무) 중 낮은 영역(C·F) 「조합」으로 골라요. 근거는 등급만.
    s가 {F,C}면 낮은 영역이 전부 F일 때 F 장면, 아니면 C 장면. 조합 장면은 F·C 둘 다 맞는 말로 써요.
    t 제목 · s 벌어지고 있을 일 · w 왜 그런지 · k 먼저 잡을 영역 · f 먼저 잡을 것 · c 상담 한 줄 */
 const SYS={goal:"목표 시스템",org:"조직 시스템",std:"표준 시스템",work:"업무 시스템",ai:"AI 시스템"};
-const C2="낮은 곳이 두 군데면 어디부터 손댈지가 가장 헷갈려요.";
-const C3="낮은 곳이 세 군데면 혼자 하나씩 고치다 지치기 쉬워요.";
+const C2="어디를 잡을지는 나왔지만, 그 안을 우리 회사 기준으로 뭘로 채울지는 혼자 정하기가 가장 어려워요.";
+const C3="어디를 잡을지는 나왔지만, 낮은 곳이 세 군데면 그 안을 혼자 하나씩 채우다 지치기 쉬워요.";
+/* 목표 기초 두 칸(결과·숫자)을 체크했으면 「정하는」 대신 「이미 아시는 방향과 숫자를 문서로 내리는」 */
+const GOALK="이미 아시는 방향과 숫자에 담당·기한을 붙여 문서로 내리는 목표 시스템을 구축하셔야 해요.";
+const gf=(x,base)=>x.has("goal",0)&&x.has("goal",1)?GOALK:base;
 /* AI 영역에서 위에서부터 처음 비어 있는 칸에 맞춘 「먼저 잡을 것」 (다섯 칸 모두면 넓히기라 없음) */
-const AIF=["AI를 매일 일에 쓰는 습관을 회사에 들이는 AI 시스템을 구축하셔야 해요.",
+const AIF=["자주 하는 일 하나를 정해, 그 일은 늘 AI에게 맡기는 AI 시스템을 구축하셔야 해요.",
  "회사 자료와 기준을 AI가 꺼내 볼 수 있게 모으는 AI 시스템을 구축하셔야 해요.",
  "자주 맡기는 일의 설명을 한 번 써 두고 계속 꺼내 쓰는 AI 시스템을 구축하셔야 해요.",
  "무엇을 왜 맡기는지까지 함께 넘기는 AI 시스템을 구축하셔야 해요.",
@@ -295,130 +416,139 @@ const WIDE={goal:["올해 가장 이루고 싶은 한 가지를 적어 두시면
   "늦어진 일을 정기적으로 짚고 고치는 흐름을 붙이시면, AI 직원이 챙길 수 있는 일도 같이 늘어나요."]};
 /* 표준에 매뉴얼은 있을 때 「먼저 잡을 것」: 새로 적기보다 매뉴얼 밖 반복 업무까지 한 목록으로 묶기 */
 const STDM="매뉴얼 밖 반복 업무까지 한 목록으로 묶어 같은 기준으로 관리하는 표준 시스템을 구축하셔야 해요.";
-const AIPLUS=" AI를 잘 쓰고 계셔도, 이 바탕이 낮으면 AI가 내놓는 결과도 들쭉날쭉하기 쉬워요.";
+const AIPLUS=" 근데 AI를 아무리 잘 쓰셔도, 이 바탕이 낮으면 AI 결과도 들쭉날쭉하기 쉬워요.";
 const PAT={
- allF:{t:"네 영역 모두 이제 세워 갈 때예요",
-  s:"직원이 「대표님 이거 어떻게 해요?」 하고 하루에도 몇 번씩 찾아오고, 대표님이 자리를 비우면 일이 멈출 거예요.",
-  w:"일하는 기준이 아직 회사에 적혀 있지 않아서, 모든 게 대표님 한 분께 기대고 있거든요.",
-  k:"goal",f:"회사 방향과 볼 숫자를 정해 적는 목표 시스템부터 구축하셔야 해요. 나머지 세 영역도 이걸 기준으로 채워져요.",
-  c:"네 영역을 한꺼번에 시작할 때는 첫걸음을 어디에 둘지가 가장 막막해요."},
- allC:{t:"네 영역 모두 첫발은 뗐어요",
-  s:"영역마다 해 둔 것이 한두 가지씩은 있는데, 서로 이어지지 않아서 같은 얘기를 여러 번 하고 계실 거예요.",
-  w:"아직 회사 기준으로 굳기 전이라, 한 영역에서 정한 것이 다른 영역으로 이어지기 어렵거든요.",
-  k:"goal",f:"다른 영역의 기준이 되는 회사 방향과 숫자를 정하는 목표 시스템부터 구축하셔야 해요.",
-  c:"네 영역이 고르게 낮으면 어디부터 손댈지 고르기가 가장 어려워요."},
- allLow:{t:"네 영역 모두 기초부터 잡을 때예요",
-  s:"일이 대표님을 거쳐야 움직여서, 하루 대부분을 확인과 설명에 쓰고 계실 거예요.",
-  w:"어느 영역도 회사 기준으로 서기 전이라, 한 번 정한 것이 다음 일의 바탕으로 남기 어렵거든요.",
-  k:"goal",f:"회사가 올해 어디로 가는지, 무슨 숫자를 볼지 정하는 목표 시스템부터 구축하셔야 해요.",
-  c:"낮은 곳이 네 군데면 혼자 하나씩 고치다 지치기 쉬워요."},
- goal:{t:"일은 쌓이는데 방향을 모으는 목표가 약해요",
-  s:{F:"직원들은 각자 맡은 일을 하는데, 연말에 돌아보면 「그래서 올해 뭘 이뤘지?」 싶으실 거예요.",
-     C:{0:"올해 가장 중요한 결과가 한 문장으로 서 있지 않아서, 회의 때마다 우선순위를 다시 정하고 계실 거예요.",
-        1:"방향은 서 있는데 꼭 볼 숫자가 모두에게 같지 않아서, 잘되고 있는지는 대표님 감으로 판단하고 계실 거예요.",
-        2:"방향과 숫자는 대표님이 알고 계신데, 이번 달 목표로 적혀 있지 않아서 직원마다 우선순위가 조금씩 다를 거예요."}},
-  w:{F:"목표가 회사 기준으로 서기 전이라, 한 일이 같은 방향으로 모였는지 비춰 볼 잣대가 약하거든요.",
-     C:{0:"무엇을 이루려는지가 회사 기준으로 서기 전이라, 한 일이 같은 방향으로 모였는지 비춰 볼 잣대가 약하거든요.",
-        1:"꼭 볼 숫자가 회사 기준으로 서기 전이라, 방향에 얼마나 다가갔는지 재 볼 잣대가 약하거든요.",
-        2:"목표가 담당·기한이 붙은 문서로 내려가기 전이라, 직원이 같은 방향을 보고 움직이기 어렵거든요."}},
-  k:"goal",f:"회사 방향과 꼭 볼 숫자를 정하고 점검하는 목표 시스템을 구축하셔야 해요.",
-  c:"다른 영역이 이미 돌아가고 있어서, 목표 하나만 바로 서도 달라지는 게 커요."},
- org:{t:"일은 도는데 결정이 대표님께 모이기 쉬워요",
-  s:{F:"작은 결정 하나까지 「대표님 이거 해도 돼요?」 하고 물어보러 와서, 대표님 하루가 확인하다 끝나실 거예요.",
-     C:{0:"일이 생길 때마다 누구에게 줄지 그때그때 정하고 계실 거예요.",
-        1:"맡길 사람은 있는데, 무엇을 넘기고 무엇을 직접 할지 선이 없어서 대표님 손에 남는 일이 많으실 거예요.",
-        2:"누가 무엇을 맡는지는 다들 아는데, 어디까지 맡는지는 적혀 있지 않아서 경계에 걸친 일은 대표님께 오기 쉬워요."}},
-  w:{F:"맡기는 선이 회사 기준으로 서기 전이라, 판단이 한곳으로 몰리거든요.",
-     C:{0:"업무 영역과 맡는 사람이 회사 기준으로 나뉘기 전이라, 판단이 한곳으로 몰리거든요.",
-        1:"대표님 몫과 넘길 몫이 회사 기준으로 갈리기 전이라, 일이 다시 대표님께 돌아오기 쉽거든요.",
-        2:"맡는 범위가 문서로 남기 전이라, 경계에 걸친 일의 판단이 한곳으로 몰리거든요."}},
+ allF:{t:"지금은 회사가 대표님 한 분으로 돌아가고 있어요",
+  s:"「대표님, 이거 어떻게 해요?」 하는 연락이 하루에도 몇 번씩 오고, 대표님이 자리를 비우면 일이 그대로 멈출 거예요.",
+  w:"일을 어떻게 하는지가 아직 어디에도 안 적혀 있으니까, 다 대표님께 물어보는 거거든요.",
+  k:"goal",f:"회사 방향과 볼 숫자를 정해 적는 목표 시스템부터 구축하셔야 해요. 기준이 하나 서야 대표님께 묻는 일이 줄어요.",
+  c:"네 영역이 모두 비어 있으면, 첫 칸을 우리 회사의 무엇으로 채울지 혼자 정하기가 가장 막막해요."},
+ allC:{t:"해 둔 건 있는데, 아직 대표님이 이어 붙여야 일이 돌아가요",
+  s:"정해 둔 게 몇 가지씩은 있는데 서로 따로 놀아서, 같은 설명을 이 사람 저 사람한테 몇 번씩 다시 하고 계실 거예요.",
+  w:x=>x.anyOps?"적어 둔 게 있어도 영역끼리 안 이어져 있으니까, 누가 이어받든 결국 대표님이 다시 설명하게 되거든요.":"정한 게 대표님 머리랑 말로만 남아 있으니까, 누가 이어받든 매번 다시 설명하게 되거든요.",
+  k:"goal",f:x=>gf(x,"다른 영역의 기준이 되는 회사 방향과 숫자를 정하는 목표 시스템부터 구축하셔야 해요."),
+  q:"목표가 한 줄로 서면, 대표님이 매번 다시 하던 설명은 얼마나 줄어들까요?",
+  c:"목표부터라는 건 나왔지만, 우리 회사가 볼 숫자와 기준을 뭘로 할지는 혼자 고르기가 가장 어려워요."},
+ allLow:{t:"네 영역 모두, 아직 대표님 한 분이 이어 주고 있어요",
+  s:"일이 다 대표님을 거쳐야 움직이니까, 정작 대표님 일은 밤에야 손대고 계실 거예요.",
+  w:"정해 둔 게 있어도 대표님 머릿속에서만 이어지고 있어서, 대표님이 빠지면 다음 일로 안 넘어가거든요.",
+  k:"goal",f:x=>gf(x,"회사가 올해 어디로 가는지, 무슨 숫자를 볼지 정하는 목표 시스템부터 구축하셔야 해요."),
+  q:"목표가 서면, 지금 대표님이 이어 주고 있는 일 중 몇 개나 혼자 굴러갈까요?",
+  c:"어디를 잡을지는 나왔지만, 낮은 곳이 네 군데면 그 안을 혼자 하나씩 채우다 지치기 쉬워요."},
+ goal:{t:x=>x.has("goal",0)?"가는 방향은 있는데, 아직 매일 할 일을 고르는 기준은 못 되고 있어요":"매일 열심히 달리는데, 올해 어디로 가는지는 아직 안 정해졌어요",
+  s:{F:"매일 일은 쳐내는데, 연말에 돌아보면 「그래서 올해 뭘 이뤘지?」 싶으실 거예요.",
+     C:{0:"올해 가장 중요한 결과가 한 문장으로 안 서 있어서, 회의 때마다 우선순위를 다시 정하고 계실 거예요.",
+        1:"방향은 있는데 꼭 볼 숫자가 안 정해져 있어서, 잘되고 있는지는 대표님 감으로 보고 계실 거예요.",
+        2:"방향이랑 숫자는 대표님이 알고 계신데, 이번 달 목표로는 안 적혀 있어서 일을 맡길 때마다 우선순위를 다시 말해 주고 계실 거예요."}},
+  w:{F:"올해 뭘 이룰지 정해 두지 않았으니까, 오늘 할 일도 그날그날 급한 순서대로 고르게 되거든요.",
+     C:{0:"제일 중요한 결과가 한 문장으로 안 정해져 있으니까, 할 일을 고를 때 기댈 데가 없거든요.",
+        1:"꼭 볼 숫자를 정해 두지 않았으니까, 잘되고 있는지 재 볼 방법이 감밖에 없거든요.",
+        2:"목표가 담당·기한이랑 같이 적혀 있지 않으니까, 이번 달 우선순위는 대표님한테 물어봐야만 알 수 있거든요."}},
+  k:"goal",f:x=>gf(x,"회사 방향과 꼭 볼 숫자를 정하고 점검하는 목표 시스템을 구축하셔야 해요."),
+  q:"그럼 우리 회사는 어떤 숫자 하나를 매주 봐야 할까요?",
+  c:"어디를 잡을지는 나왔지만, 그 안을 우리 회사 숫자와 기준으로 뭘로 채울지는 혼자 정하기가 가장 어려워요."},
+ org:{t:"작은 결정까지 대표님 손을 거쳐야 끝나요",
+  s:{F:"「대표님, 이거 해도 돼요?」 하는 연락이 종일 와서, 확인만 하다가 하루가 끝나실 거예요.",
+     C:{0:"일이 생길 때마다 누구한테 줄지 그때그때 정하고 계실 거예요.",
+        1:"맡길 사람은 있는데, 뭘 넘기고 뭘 직접 할지 선이 없어서 대표님 손에 남는 일이 많으실 거예요.",
+        2:"누가 뭘 맡는지는 다들 아는데, 어디까지 맡는지는 안 적혀 있어서 경계에 걸친 일은 대표님한테 오기 쉬워요."}},
+  w:{F:"어디까지 맡기고 어디부터 대표님이 볼지 정해 둔 게 없으니까, 작은 일도 다 대표님 확인을 거치는 거거든요.",
+     C:{0:"일을 나눌 때 누구 몫인지 미리 안 정해 두니까, 매번 대표님이 그 자리에서 정하게 되거든요.",
+        1:"대표님이 꼭 할 일과 넘길 일을 안 나눠 두니까, 넘겨도 될 일까지 대표님 손에 남거든요.",
+        2:"어디까지 맡는지가 안 적혀 있으니까, 경계에 있는 일은 다시 대표님께 묻게 되거든요."}},
   k:"org",f:"담당자와 결정 범위를 문서로 정하는 조직 시스템을 구축하셔야 해요.",
-  c:"다른 영역이 받쳐 주고 있어서, 이것만 풀려도 대표님 시간이 많이 돌아와요."},
- std:{t:"일하는 방법이 회사에 덜 쌓였어요",
-  s:{F:"새 직원이 올 때마다 같은 걸 처음부터 가르치고, 잘하던 직원이 나가면 그 노하우도 같이 나갈 거예요.",
-     C:{0:"어떤 일이 반복되는지 목록으로 모여 있지 않아서, 새 직원은 일이 생길 때마다 하나씩 물어보며 배우고 있을 거예요.",
-        1:"반복 업무 목록은 있는데, 순서와 결과물을 설명하는 방식이 사람마다 달라서 같은 일도 결과물이 조금씩 다를 거예요.",
-        2:"순서는 말로 설명하실 수 있는데, 적힌 매뉴얼이 없어서 새 직원이 올 때마다 처음부터 다시 말해 주고 계실 거예요.",
-        M:"매뉴얼은 있는데 다른 부분이 비어 있어서, 매뉴얼 밖 일은 여전히 사람마다 다르게 하고 계실 거예요."}},
-  w:{F:"순서와 기준이 회사 것으로 굳기 전이라, 다음 사람이 그대로 이어받기 어렵거든요.",
-     C:{0:"반복 업무가 무엇인지부터 회사 기준으로 모이기 전이라, 다음 사람이 그대로 이어받기 어렵거든요.",
-        1:"업무마다 순서와 결과물이 회사 기준으로 굳기 전이라, 다음 사람이 그대로 이어받기 어렵거든요.",
-        2:"말로 전하는 순서가 문서로 옮겨지기 전이라, 설명하는 사람이 없으면 이어받기 어렵거든요.",
-        M:"매뉴얼에 담긴 일과 빠진 일의 경계가 정리되기 전이라, 빠진 일은 다음 사람이 이어받기 어렵거든요."}},
+  q:"선을 어디에 그으면 대표님께 오는 연락이 제일 많이 줄어들까요?",
+  c:"어디를 잡을지는 나왔지만, 우리 회사에서 무엇을 어디까지 넘길지는 혼자 정하기가 가장 어려워요."},
+ std:{t:x=>x.lowG==="F"?"일하는 방법이 사람 머릿속에만 있어요":x.cv==="M"?"매뉴얼은 있는데, 그 밖의 일은 아직 그때그때 해요":"일하는 방법이 아직 말로만 오가요",
+  s:{F:"새로 일을 맡길 사람이 올 때마다 같은 걸 처음부터 가르치고, 그 사람이 그만두면 쌓인 요령도 같이 사라질 거예요.",
+     C:{0:"뭐가 반복되는 일인지 목록이 없어서, 일을 맡길 때마다 하나씩 다시 설명하고 계실 거예요.",
+        1:"반복 업무 목록은 있는데, 순서랑 결과물을 설명하는 게 사람마다 달라서 같은 일도 결과가 조금씩 다를 거예요.",
+        2:"순서는 말로 설명하실 수 있는데, 적힌 매뉴얼이 없어서 새로 맡기는 사람이 올 때마다 처음부터 다시 말해 주고 계실 거예요.",
+        M:"매뉴얼은 있는데 빠진 부분이 있어서, 매뉴얼 밖 일은 여전히 사람마다 다르게 하고 계실 거예요."}},
+  w:{F:"일하는 순서가 아직 어디에도 안 적혀 있으니까, 대표님이 직접 말해 주지 않으면 이어받을 수가 없는 거거든요.",
+     C:{0:"뭐가 반복되는지부터 정리가 안 돼 있으니까, 뭘 가르쳐야 할지도 그때그때 정하게 되거든요.",
+        1:"같은 일을 사람마다 다른 순서로 하니까, 결과물을 맞추려면 결국 대표님이 다시 봐야 하거든요.",
+        2:"순서가 대표님 말로만 전해지니까, 설명할 시간이 없는 날엔 일이 멈추거든요.",
+        M:"매뉴얼에 없는 일은 각자 자기 방식대로 하니까, 결과를 대표님이 다시 맞추게 되거든요."}},
   k:"std",f:x=>x.cv==="M"?STDM:"반복 업무를 처음 온 사람도 따라 할 수 있게 정리하는 표준 시스템을 구축하셔야 해요.",
-  c:x=>x.cv==="M"?"매뉴얼에 든 일과 빠진 일을 한 목록으로 묶으면, 사람에게도 AI에게도 넘기기 쉬워져요.":"한 번 적어 두면 사람에게도 AI에게도 그대로 넘길 수 있어요."},
- work:{t:"일의 흐름이 회사에 덜 남아요",
+  q:x=>x.cv==="M"?"목록을 어디까지 넓혀야 실제로 펼쳐 보는 매뉴얼이 될까요?":"어떤 일부터 적어 두면 같은 설명을 제일 덜 하게 될까요?",
+  c:x=>x.cv==="M"?"매뉴얼 밖 일 중 무엇을 목록에 올리고 어떤 기준으로 묶을지는 혼자 정하기가 가장 어려워요.":"어디를 잡을지는 나왔지만, 우리 회사 일 중 무엇부터 어떤 순서로 적을지는 혼자 정하기가 가장 어려워요."},
+ work:{t:x=>x.lowG==="F"?"일이 어디까지 됐는지, 물어봐야만 알 수 있어요":"일한 흔적이 아직 한눈에 안 모여요",
   s:{F:"「그거 어디까지 됐어요?」를 하루에도 몇 번씩 묻고 계실 거예요.",
      C:{0:"사람마다 적는 곳이 달라서, 지난주 일을 찾으려면 이 방 저 방을 뒤지고 계실 거예요.",
-        1:"할 일은 한곳에 적어 두시는데, 파일 둘 자리가 정해지지 않아서 자료를 찾느라 시간을 쓰고 계실 거예요.",
+        1:"할 일은 한곳에 적어 두시는데, 파일 둘 자리가 안 정해져 있어서 자료 찾느라 시간을 쓰고 계실 거예요.",
         2:"적어 두는 곳은 있는데 담당·마감까지는 안 보여서, 「그거 누가 해요?」를 하루에도 몇 번씩 물으실 거예요."}},
-  w:{F:"지난 일이 회사 기록으로 쌓이기 전이라, 다음 일을 할 때 꺼내 쓰기 어렵거든요.",
-     C:{0:"진행 중인 일이 한곳에 쌓이기 전이라, 다음 일을 할 때 꺼내 쓰기 어렵거든요.",
-        1:"파일 둘 곳이 회사 기준으로 정해지기 전이라, 지난 자료를 다음 일에 꺼내 쓰기 어렵거든요.",
-        2:"누가 언제까지 하는지가 기록으로 남기 전이라, 진행 상황을 직접 물어야 알 수 있거든요."}},
+  w:{F:"할 일을 적는 곳이 사람마다 달라서, 진행 상황이 한곳에 안 모이거든요.",
+     C:{0:"할 일 적는 곳이 정해져 있지 않으니까, 지난 일을 찾으려면 기억을 더듬어야 하거든요.",
+        1:"자료마다 놓인 곳이 다르니까, 같은 자료를 찾는 데 매번 시간이 들거든요.",
+        2:"누가 언제까지 하는지가 안 남으니까, 진행 상황은 사람한테 물어봐야 알 수 있거든요."}},
   k:"work",f:"일·회의·파일을 한곳에 모아 누가 무엇을 언제까지 하는지 보이게 하는 업무 시스템을 구축하셔야 해요.",
-  c:"업무 기록이 모일수록 AI에게 넘길 수 있는 일도 늘어나요."},
- "goal,org":{t:"일은 도는데 방향과 판단이 대표님께 모이기 쉬워요",
-  s:x=>x.has("goal",2,3)||x.has("org",2,3)?"목표나 맡는 기준이 일부 적혀 있어도 서로 이어지지 않아서, 애매한 일은 결국 대표님이 정해 주고 계실 거예요.":"직원들은 바쁘게 일하는데, 뭘 먼저 할지는 결국 대표님이 하나하나 정해 주고 계실 거예요.",
-  w:x=>x.has("goal",2,3)||x.has("org",2,3)?"적어 둔 목표와 맡는 기준이 한 흐름으로 묶이기 전이라, 판단이 대표님께 다시 모이거든요.":"무엇을 우선할지와 누가 판단할지가 회사 기준으로 정리되기 전이거든요.",
-  k:"goal",f:"회사 방향과 꼭 볼 숫자를 담당·기한까지 정해 두는 목표 시스템을 구축하셔야 해요.",c:C2},
- "std,work":{t:"일하는 방법과 기록이 덜 쌓였어요",
+  q:"진행 상황을 안 물어도 되려면, 뭐부터 적어 두면 될까요?",
+  c:"어디를 잡을지는 나왔지만, 우리 회사 일을 어떤 칸으로 나눠 모을지는 혼자 정하기가 가장 어려워요."},
+ "goal,org":{t:x=>x.has("goal",2,3)||x.has("org",2,3)?"적어 둔 게 있어도, 뭘 먼저 할지는 아직 대표님이 정해요":"뭘 먼저 할지가 아직 그날그날 대표님 감에 달려 있어요",
+  s:x=>x.has("goal",2,3)||x.has("org",2,3)?"목표나 맡는 기준이 일부 적혀 있어도 서로 이어지지 않아서, 애매한 일은 결국 대표님이 정해 주고 계실 거예요.":"매일 바쁘게 돌아가는데, 저녁에 보면 오늘 한 일 대부분이 그날 들어온 일일 거예요.",
+  w:x=>x.has("goal",2,3)||x.has("org",2,3)?"적어 둔 목표랑 맡는 기준이 따로 있으니까, 둘 사이에 걸린 일은 대표님이 정하게 되거든요.":"이번 달 목표가 담당·기한이랑 같이 안 적혀 있으니까, 고를 때마다 대표님 판단이 필요하거든요.",
+  k:"goal",f:x=>gf(x,"회사 방향과 꼭 볼 숫자를 담당·기한까지 정해 두는 목표 시스템을 구축하셔야 해요."),q:"목표 하나에 담당을 붙이면, 대표님이 매일 정하던 일 중 몇 개나 손을 떠날까요?",c:C2},
+ "std,work":{t:"한 번 해 본 일도, 다음엔 또 처음부터예요",
   s:x=>x.has("std",2,3)||x.has("work",0,2,3)?"적어 둔 것은 있는데 한데 묶여 있지 않아서, 사람이 바뀌면 어디서부터 봐야 할지 다시 알려 주고 계실 거예요.":"사람이 바뀔 때마다 일을 다시 가르치고, 지난달에 어떻게 했는지는 대화방을 뒤져야 나올 거예요.",
-  w:x=>x.has("std",2,3)||x.has("work",0,2,3)?"적어 둔 순서와 기록이 한 흐름으로 묶이기 전이라, 다음 사람이 어디서부터 이어받을지 알기 어렵거든요.":"한 번 해 본 일이 회사 기준으로 정리되기 전이라, 다음 사람에게 넘어가지 않거든요.",
-  k:"std",f:x=>x.has("std",2)?STDM:"반복 업무를 누가 와도 따라 할 수 있게 정리하는 표준 시스템을 구축하셔야 해요.",c:C2},
- "goal,std":{t:"잘한 기준과 일하는 방법이 덜 잡혔어요",
+  w:x=>x.has("std",2,3)||x.has("work",0,2,3)?"적어 둔 순서와 기록이 한곳에 안 묶여 있으니까, 어디서부터 이어받을지는 대표님이 알려 줘야 하거든요.":"해 본 방법이랑 기록이 어디에도 안 남으니까, 다음 사람한테는 대표님이 처음부터 다시 말해 줘야 하거든요.",
+  k:"std",f:x=>x.has("std",2)?STDM:"반복 업무를 누가 와도 따라 할 수 있게 정리하는 표준 시스템을 구축하셔야 해요.",q:"순서랑 기록을 한자리에 두면, 다음 사람은 어디까지 혼자 이어받을 수 있을까요?",c:C2},
+ "goal,std":{t:"무엇이 잘한 일인지, 아직 대표님만 알아요",
   s:x=>x.has("std",2)?"매뉴얼은 있는데 무엇을 잘한 일로 볼지가 없어서, 결과물 품질이 사람마다 제각각일 거예요.":"사람마다 일하는 방식이 달라서, 결과물 품질이 매번 제각각일 거예요.",
-  w:x=>x.has("std",2)?"순서는 매뉴얼에 있어도 무엇을 잘한 일로 볼지가 회사 기준으로 서기 전이거든요.":"무엇을 잘한 일로 볼지와 어떤 순서로 할지가 회사 기준으로 정리되기 전이거든요.",
-  k:"goal",f:"잘한 일의 기준이 되는 회사 방향과 숫자를 정하는 목표 시스템을 구축하셔야 해요.",c:C2},
- "goal,work":{t:"바쁜데 남는 게 적어요",
+  w:x=>x.has("std",2)?"순서는 매뉴얼에 있어도 뭐가 잘된 결과인지는 안 적혀 있으니까, 결국 대표님 눈으로 판단하게 되거든요.":"뭐가 잘된 결과인지도, 어떤 순서로 할지도 안 정해 두셨으니까 매번 대표님 눈으로 판단하게 되거든요.",
+  k:"goal",f:x=>gf(x,"잘한 일의 기준이 되는 회사 방향과 숫자를 정하는 목표 시스템을 구축하셔야 해요."),q:"「잘했다」의 기준을 하나 정하면, 매뉴얼엔 뭐가 들어가야 할까요?",c:C2},
+ "goal,work":{t:"바쁜데, 월말에 남는 게 잘 안 보여요",
   s:x=>x.has("goal",2,3)||x.has("work",0,2,3)?"목표나 할 일이 적힌 곳은 있어도 서로 이어지지 않아서, 월말에 한 일이 목표에 얼마나 다가갔는지 따로 맞춰 보고 계실 거예요.":"매일 바쁜데 월말이면 「이번 달 뭐 했지?」 싶으실 거예요.",
-  w:x=>x.has("goal",2,3)||x.has("work",0,2,3)?"적어 둔 목표와 일한 기록이 한 기준으로 이어지기 전이라, 둘을 맞춰 보는 데 손이 많이 가거든요.":"목표와 일한 기록이 회사 기준으로 서기 전이라, 한 일이 목표에 얼마나 다가갔는지 확인하기 어렵거든요.",
-  k:"goal",f:"이번 달 무엇을 이룰지와 볼 숫자를 정하는 목표 시스템을 구축하셔야 해요.",c:C2},
- "org,std":{t:"일이 사람을 따라다니기 쉬워요",
-  s:x=>x.has("std",2)?"매뉴얼은 있는데 어디까지 누가 맡을지 선이 그어지지 않아서, 맡은 직원이 휴가를 가면 일이 멈추거나 대표님이 대신 하고 계실 거예요.":"그 일은 그 직원만 알아서, 그 사람이 휴가를 가면 일이 멈추거나 대표님이 대신 하고 계실 거예요.",
-  w:x=>x.has("std",2)?"순서는 매뉴얼에 있어도 누가 어디까지 맡는지가 회사 기준으로 서기 전이거든요.":"맡은 범위와 일하는 순서를 다른 사람이 이어받을 장치가 약하거든요.",
-  k:"org",f:"누가 무엇을 맡고 어디까지 책임지는지 정하는 조직 시스템을 구축하셔야 해요.",c:C2},
- "org,work":{t:"맡김과 진행 상황이 덜 보여요",
+  w:x=>x.has("goal",2,3)||x.has("work",0,2,3)?"목표랑 일한 기록이 따로 노니까, 둘을 맞춰 보는 데 대표님 손이 많이 가거든요.":"이룰 목표도 한 일의 기록도 안 남아 있으니까, 뭐가 남았는지 돌아볼 거리가 없거든요.",
+  k:"goal",f:x=>gf(x,"이번 달 무엇을 이룰지와 볼 숫자를 정하는 목표 시스템을 구축하셔야 해요."),q:"매일 적는 기록 중에 진짜 목표랑 이어지는 건 몇 줄이나 될까요?",c:C2},
+ "org,std":{t:"일이 그 일을 하는 사람에게 묶여 있어요",
+  s:x=>x.has("std",2)?"매뉴얼은 있는데 어디까지 누가 맡을지 선이 그어지지 않아서, 맡은 사람이 쉬는 날엔 일이 멈추거나 대표님이 대신 하고 계실 거예요.":"그 일은 하던 사람만 알아서, 그 사람이 쉬는 날엔 일이 멈추거나 대표님이 대신 하고 계실 거예요.",
+  w:x=>x.has("std",2)?"순서는 매뉴얼에 있어도 누가 어디까지 맡는지는 안 정해 두셨으니까, 빈자리는 대표님이 메우게 되거든요.":"누가 맡는지도, 어떻게 하는지도 그 사람 머릿속에만 있으니까 빈자리는 대표님이 메우게 되거든요.",
+  k:"org",f:"누가 무엇을 맡고 어디까지 책임지는지 정하는 조직 시스템을 구축하셔야 해요.",q:"누구한테 어디까지 맡길지 정해지면, 적어 둘 순서도 훨씬 짧아질 수 있어요.",c:C2},
+ "org,work":{t:"누가 무엇을 하고 있는지, 대표님이 챙겨야 보여요",
   s:x=>x.has("work",2)?"담당·마감은 적혀 있는데 맡기는 선이 흐려서, 경계에 걸친 일은 결국 대표님이 챙기고 계실 거예요.":x.has("work",0,3)?"일을 적어 두는 곳은 있는데 맡기는 선이 흐려서, 누가 챙길지 애매한 일은 대표님께 돌아오고 있을 거예요.":"누가 뭘 하고 있는지 대표님이 직접 물어봐야 알고, 대표님 일은 밤에 하고 계실 거예요.",
-  w:x=>x.has("work",0,2,3)?"적힌 기록은 있어도 누가 어디까지 맡는지가 회사 기준으로 서기 전이거든요.":"맡은 사람과 진행 상황을 적어 두는 회사 기준이 서기 전이거든요.",
-  k:"org",f:"누가 무엇을 어디까지 맡는지 정하는 조직 시스템을 구축하셔야 해요.",c:C2},
- "org,std,work":{t:"목표 아래로 일이 덜 이어져요",
-  s:"목표를 말해도 직원들은 그게 자기 일과 무슨 상관인지 몰라서, 대표님 혼자 뛰고 계실 거예요.",
-  w:"조직·표준·업무가 회사 기준으로 서기 전이라, 목표가 맡은 사람과 일하는 순서로 내려가기 어렵거든요.",
-  k:"org",f:"목표를 누가 어디까지 맡을지 나누는 조직 시스템을 구축하셔야 해요.",c:C3},
- "goal,std,work":{t:"맡길 바탕이 덜 갖춰졌어요",
+  w:x=>x.has("work",0,2,3)?"적힌 기록은 있어도 누가 어디까지 맡는지는 안 정해 두셨으니까, 경계에 있는 일은 다시 대표님 몫이 되거든요.":"누가 뭘 맡았고 어디까지 했는지 적어 두는 곳이 없으니까, 대표님이 하나하나 확인해야 하거든요.",
+  k:"org",f:"누가 무엇을 어디까지 맡는지 정하는 조직 시스템을 구축하셔야 해요.",q:"맡는 선만 그어져도, 기록에서 대표님이 챙겨 볼 건 꽤 줄어들 수 있어요.",c:C2},
+ "org,std,work":{t:"세워 둔 목표가 매일의 일로 내려가지 않아요",
+  s:"목표를 세워 두셔도 그게 오늘 할 일과 어떻게 이어지는지 대표님만 알아서, 대표님 혼자 뛰고 계실 거예요.",
+  w:"목표를 누가 어떤 순서로 나눠 할지 안 정해 두셨으니까, 목표랑 오늘 일 사이를 대표님이 직접 잇고 계신 거거든요.",
+  k:"org",f:"목표를 누가 어디까지 맡을지 나누는 조직 시스템을 구축하셔야 해요.",q:"목표를 사람별로 나누면, 오늘 할 일의 주인은 누가 돼야 할까요?",c:C3},
+ "goal,std,work":{t:"맡겨도, 결국 대표님 손을 한 번 더 거쳐요",
   s:"일을 맡겨도 결과물을 결국 대표님이 하나하나 다시 보고 계실 거예요.",
-  w:"잘한 기준과 일하는 순서가 회사 기준으로 서기 전이라, 맡은 사람에게 전해지기 어렵거든요.",
-  k:"goal",f:"잘한 일의 기준이 되는 회사 방향과 숫자를 정하는 목표 시스템을 구축하셔야 해요.",c:C3},
- "goal,org,work":{t:"할 일의 순서와 주인이 덜 정해졌어요",
-  s:"급한 일부터 처리하다 보면, 정작 중요한 일은 이번 주에도 뒤로 밀려 있을 거예요.",
-  w:"무엇을 먼저 하고 누가 맡을지가 회사 기준으로 정해지기 전이거든요.",
-  k:"goal",f:"회사가 무엇을 먼저 이룰지와 볼 숫자를 정하는 목표 시스템을 구축하셔야 해요.",c:C3},
- "goal,org,std":{t:"할 일은 보이는데 판단 기준이 덜 잡혔어요",
-  s:"직원이 일을 끝내 와도, 잘된 건지는 대표님이 보셔야 판단이 날 거예요.",
-  w:"무엇이 잘된 일인지 비춰 볼 회사 기준이 서기 전이거든요.",
-  k:"goal",f:"쌓이는 일 중 무엇이 중요한지 정해 주는 목표 시스템을 구축하셔야 해요.",c:C3},
- aiF:{t:"이제 AI를 붙여 볼 차례예요",
-  s:"반복 업무를 아직 사람이 하나하나 하고 계실 거예요.",
-  w:"목표부터 업무까지 바탕이 서 있어서, 이제 AI에게 일을 넘겨 볼 수 있거든요.",
+  w:"잘한 기준도 일하는 순서도 안 정해져 있으니까, 맡긴 결과를 맞춰 볼 잣대가 대표님 눈뿐이거든요.",
+  k:"goal",f:x=>gf(x,"잘한 일의 기준이 되는 회사 방향과 숫자를 정하는 목표 시스템을 구축하셔야 해요."),q:"잘한 결과를 하나로 정하면, 대표님이 다시 보는 일은 얼마나 남을까요?",c:C3},
+ "goal,org,work":{t:"급한 일에 밀려, 중요한 일이 계속 뒤로 가요",
+  s:"이번 주에도 매출에 닿는 일보다 당장 온 연락부터 처리하고 계실 거예요.",
+  w:"뭘 먼저 하고 누가 맡을지 정해 둔 게 없으니까, 그날 제일 시끄러운 일이 순서를 정하게 되거든요.",
+  k:"goal",f:x=>gf(x,"회사가 무엇을 먼저 이룰지와 볼 숫자를 정하는 목표 시스템을 구축하셔야 해요."),q:"이번 주 일정에서 진짜 먼저 해야 할 일은 몇 개나 될까요?",c:C3},
+ "goal,org,std":{t:"일을 마쳐도, 잘됐는지는 대표님이 봐야 알아요",
+  s:"맡긴 일이 끝나 돌아와도, 잘된 건지는 대표님이 보셔야 판단이 날 거예요.",
+  w:"뭐가 잘된 결과인지 적어 둔 기준이 없으니까, 판단이 다 대표님 눈에 걸려 있는 거거든요.",
+  k:"goal",f:"쌓이는 일 중 무엇이 중요한지 정해 주는 목표 시스템을 구축하셔야 해요.",q:"「잘됐다」를 뭘로 볼지 정해 두면, 대표님 확인 없이 끝나는 일이 생길 수 있어요.",c:C3},
+ aiF:{t:"바탕은 다 갖추셨는데, AI한테 맡긴 일은 아직 하나도 없어요",
+  s:"보고서, 답장, 정리처럼 매주 똑같이 하는 일을 아직 사람이 손으로 하고 계실 거예요.",
+  w:"일하는 순서가 사람 기준으로만 잡혀 있어서, 그중 뭘 AI한테 넘길지가 아직 안 정해졌거든요.",
   k:"ai",f:AIF[0],
-  c:"어떤 업무부터 AI에게 붙일지가 첫 고민이 될 거예요."},
- aiC:{t:"AI를 회사 방식으로 쓰기 전이에요",
+  q:"매주 반복하는 일 중에, 꼭 사람이 해야 하는 건 몇 개나 될까요?",
+  c:"어디를 잡을지는 나왔지만, 우리 회사 일 중 첫 번째로 맡길 일을 고르기가 가장 어려워요."},
+ aiC:{t:x=>x.aiUse?"AI를 쓰긴 하는데, 아직 회사 방식은 없어요":"자료는 모아 두셨는데, AI는 아직 일에 쓰이지 않아요",
   s:x=>x.aiUse?"같은 일을 시켜도 결과가 매번 달라서, 결국 대표님이 다시 손보고 계실 거예요.":"AI에게 줄 자료는 조금 있는데, 실제 일은 아직 사람이 손으로 하고 계실 거예요.",
-  w:x=>x.aiUse?"네 영역의 바탕은 서 있어서, AI 쓰는 방식만 맞추면 결과가 고르게 나올 수 있어요.":"네 영역의 바탕은 서 있어서, AI를 실제 일에 쓰기 시작하면 모아 둔 자료가 바로 쓰일 수 있어요.",
+  w:x=>x.aiUse?"같은 일도 사람마다 그때그때 다르게 시키니까, AI 결과도 매번 달라지는 거거든요.":"모아 둔 자료를 실제 일에서 AI한테 건네는 자리가 없으니까, 일은 여전히 손으로 하게 되거든요.",
   k:"ai",f:x=>AIF[x.aiGap],
-  c:"어떤 일부터 AI에게 맡기는 방식을 맞출지 고르는 게 첫 고민이에요."},
- aiB:{t:"AI에게 더 깊이 맡길 차례예요",
+  q:"같은 일을 늘 같은 말로 시키면, 결과는 얼마나 고르게 나올까요?",
+  c:"어디를 잡을지는 나왔지만, AI에게 일을 시키는 우리 회사 방식을 뭘로 정할지는 혼자 정하기가 가장 어려워요."},
+ aiB:{t:"AI가 일을 돕긴 하는데, 아직 사람 손이 꼭 한 번씩 가요",
   s:"AI에게 맡기는 일은 있는데, 여전히 사람이 하나하나 시켜야 돌아가는 일이 많으실 거예요.",
-  w:"네 영역의 바탕이 서 있어서, AI에게 넘기는 방법만 바꿔도 대표님 손이 줄 수 있어요.",
+  w:"AI가 일을 이어받을 기준이 아직 비어 있으니까, 시킬 때마다 대표님이 한 번씩 거들게 되거든요.",
   k:"ai",f:x=>AIF[x.aiGap],
-  c:"어떤 업무를 AI에게 통째로 넘겨 볼지가 다음 고민이에요."},
+  q:"대표님이 안 거들어도 끝까지 가는 일이 지금 몇 개나 될까요?",
+  c:"어디를 잡을지는 나왔지만, 어떤 업무를 어떤 기준으로 AI에게 통째로 넘길지는 혼자 정하기가 가장 어려워요."},
  /* AI는 A, 네 영역 중 B가 남은 경우: 구축 대신 B 영역 다듬기 */
- aiA:{wide:true,lab:"다음으로 다듬을 것",h:"더 다듬어 보고 싶다면",t:"AI는 앞서 있고, 바탕만 다듬으면 돼요",
+ aiA:{wide:true,lab:"다음으로 다듬을 것",h:"더 다듬어 보고 싶다면",t:"AI는 앞서 있고, 바탕을 다듬으면 돼요",
   s:"AI가 해 놓은 결과를 대표님이 마지막에 다시 손보고 계실 거예요.",
-  w:x=>`${x.bNames} 쪽에 아직 빈 칸이 남아 있어서, AI가 참고하는 회사 기준에도 빈 곳이 생기기 쉽거든요.`,
+  w:x=>`${x.bNames} 쪽에 아직 빈칸이 있어서, AI가 기댈 회사 기준도 그만큼 비어 있거든요.`,
   k:x=>x.bKey,f:x=>WIDE[x.bKey][x.bGap],
-  c:"어느 기준부터 다듬을지 같이 보면, AI에게 넘길 일도 함께 정리돼요."},
+  c:"어느 칸부터 우리 회사 기준으로 채울지는 혼자 정하기가 가장 어려워요."},
  /* 다섯 영역 모두 A: 칭찬 + AI 업무 넓히기 */
  allA:{wide:true,lab:"다음으로 넓혀 볼 것",t:"다섯 영역 모두 A예요",
   s:"대표님이 자리를 비워도 일이 돌아가는 구조예요.",
@@ -446,114 +576,173 @@ const ORDER=["F","C","B","A"];
 const grade=n=>n>=5?"A":n>=3?"B":n>=1?"C":"F";
 /* 예시 회사(유아용품 브랜드, 작은 팀): 조직 첫 칸만 「예」, 표준·AI는 예시 기록 없음 */
 const DEMO={goal:[0,0,0,0,0],org:[1,0,0,0,0],std:[0,0,0,0,0],work:[0,0,0,0,0],ai:[0,0,0,0,0],none:["std","ai"]};
+
+/* ===== 여기부터 새 UI ===== */
 const KEY="ai-work-diagnosis-v1";
+const $=id=>document.getElementById(id);
 let mine={};
 try{mine=JSON.parse(localStorage.getItem(KEY)||"{}")||{}}catch(e){mine={}}
-let demo=null,undo=null;
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(mine))}catch(e){}};
-const view=()=>demo||mine;
-const $=id=>document.getElementById(id);
+/* 25문항 평탄화 */
+const QS=[];AREAS.forEach((a,ai)=>a.q.forEach((q,i)=>QS.push({a,ai,i,lv:q[0],t:q[1],gl:q[2]})));
+const ans=(q,s=mine)=>(s[q.a.k]||[])[q.i];
+const firstOpen=()=>{const k=QS.findIndex(q=>ans(q)===undefined);return k<0?QS.length:k;};
+let cur=0,demo=null,screen="start";
 
-/* 영역 카드 그리기 */
-const box=$("areas");
-AREAS.forEach(a=>{
-  const el=document.createElement("section");el.className="area";el.id="area-"+a.k;
-  el.innerHTML=`<div class="ahead"><h2>${a.n}<span class="what">${a.what}</span></h2></div>
-  <div class="crit">체크 기준: ${a.crit}</div>
-  <div class="nonote" id="nn-${a.k}" hidden>예시 기록에 없는 영역이라 비워 뒀어요.</div>
-  ${a.q.map((q,i)=>`<label class="q"><input type="checkbox" id="${a.k}-${i}" data-a="${a.k}" data-i="${i}"><span class="qt"><span class="lv">${q[0]}</span>${q[1]}${q[2]?` <span class="gl">(${q[2]})</span>`:""}</span></label>`).join("")}
-  <div class="cnt" id="c-${a.k}">「예」 0 / 5</div>`;
-  box.appendChild(el);
-});
-box.addEventListener("change",e=>{const t=e.target;if(!t.matches("input[type=checkbox]")||demo)return;
-  (mine[t.dataset.a]=mine[t.dataset.a]||[])[+t.dataset.i]=t.checked?1:0;undo=null;save();render();});
-let shown=false;
-/* 화면을 바꾸면 맨 위로. 직전 휠 스크롤이 몇 px 남아 밀어도 0.5초 동안은 맨 위로 되돌려요 */
-function toTop(){
-  const top=()=>window.scrollTo({top:0,left:0,behavior:"instant"});top();
-  const f=()=>{if(scrollY>0&&scrollY<80)top();};
-  addEventListener("scroll",f,{passive:true});setTimeout(()=>removeEventListener("scroll",f),500);
+function show(name){
+  screen=name;
+  ["sStart","sQ","sDone","sR"].forEach(id=>$(id).hidden=true);
+  $({start:"sStart",q:"sQ",done:"sDone",result:"sR"}[name]).hidden=false;
+  $("dock").style.display="";
+  window.scrollTo({top:0,left:0,behavior:"instant"});
+  if(name!=="result")$("dock").classList.remove("show");
 }
-function go(r){shown=r;render();toTop();if(r)$("rHead").focus({preventScroll:true});}
-/* 모두 지우기 = 바로 지우고 「되돌리기」를 남겨요 */
-$("btnReset").addEventListener("click",()=>{
-  const any=Object.values(mine).some(v=>Array.isArray(v)&&v.some(Boolean));
-  if(!any)return;/* 지울 게 없으면 되돌리기는 그대로 둬요 */
-  undo=JSON.parse(JSON.stringify(mine));mine={};save();render();});
-$("btnUndo").addEventListener("click",()=>{if(undo){mine=undo;undo=null;save();render();}});
-/* 예시 = 체크 화면에 예시를 채워 보여 줘요. 내 체크는 그대로 보관, 예시 중엔 칸이 잠겨요 */
-$("btnDemo").addEventListener("click",()=>{demo=JSON.parse(JSON.stringify(DEMO));undo=null;go(false);});
-$("btnDemoOff").addEventListener("click",()=>{demo=null;go(false);});
-$("btnShow").addEventListener("click",()=>go(true));
-$("btnMine").addEventListener("click",()=>{demo=null;go(false);});
-$("btnAgain").addEventListener("click",()=>{demo=null;go(false);});
 
-/* 오각형(레이더) 그래프 */
+/* ── 시작 화면 ── */
+function miniPenta(){
+  const cx=80,cy=82,R=62,p=(i,r)=>{const a=(-90+i*72)*Math.PI/180;return[cx+r*Math.cos(a),cy+r*Math.sin(a)]};
+  let h="";
+  [1,.66,.33].forEach((k,j)=>h+=`<polygon points="${[0,1,2,3,4].map(i=>p(i,R*k).join(",")).join(" ")}" fill="${j?"none":"#FAF8F5"}" stroke="${j?"#EBE3D8":"#DCD1C1"}" stroke-width="${j?1:1.5}"/>`);
+  const v=[.82,.5,.66,.4,.92];
+  h+=`<polygon points="${v.map((k,i)=>p(i,R*k).join(",")).join(" ")}" fill="rgba(232,114,0,.14)" stroke="#E87200" stroke-width="2" stroke-linejoin="round"/>`;
+  AREAS.forEach((a,i)=>{const[x,y]=p(i,R+14);h+=`<text x="${x}" y="${y+4}" text-anchor="middle" font-size="11" font-weight="700" fill="#231815" font-family="Pretendard,sans-serif">${a.n}</text>`;});
+  $("miniPenta").innerHTML=h;
+  $("areaList").innerHTML=AREAS.map(a=>`<li><b>${a.n}</b><span>${a.what}</span></li>`).join("");
+}
+function renderStart(){
+  const k=firstOpen(),any=QS.some(q=>ans(q)!==undefined);
+  $("btnStart").innerHTML=any&&k<QS.length?`이어서 하기 <small style="font-weight:600;opacity:.85">(${k+1}번째 문항부터)</small> <span aria-hidden="true">→</span>`:any?`내 결과 다시 보기 <span aria-hidden="true">→</span>`:`진단 시작하기 <span aria-hidden="true">→</span>`;
+  $("btnRestart").hidden=!any;
+}
+$("btnStart").addEventListener("click",()=>{const k=firstOpen();if(k>=QS.length){demo=null;renderResult();show("result");focusHead();}else{cur=k;show("q");renderQ(0);}});
+$("btnRestart").addEventListener("click",()=>{mine={};save();cur=0;show("q");renderQ(0);});
+$("btnDemo").addEventListener("click",()=>{demo=JSON.parse(JSON.stringify(DEMO));renderResult();show("result");focusHead();});
+
+/* ── 질문 화면 ── */
+$("track").innerHTML=AREAS.map(a=>`<div class="seg" data-k="${a.k}"><div class="bar"><i></i></div><span class="nm">${a.n}</span></div>`).join("");
+function renderQ(dir){
+  const q=QS[cur];
+  const done=QS.filter(x=>ans(x)!==undefined).length;
+  $("qCount").innerHTML=`<span>${cur+1}</span> <small>/ ${QS.length}</small>`;
+  [...$("track").children].forEach((el,ai)=>{
+    const a=AREAS[ai],n=a.q.filter((_,i)=>(mine[a.k]||[])[i]!==undefined).length;
+    el.querySelector("i").style.width=(n/5*100)+"%";
+    el.classList.toggle("on",ai===q.ai);el.classList.toggle("fin",n===5&&ai!==q.ai);
+  });
+  $("qChip").innerHTML=`<b>${q.a.n}</b><span class="dot"></span><span class="lv">${q.lv}</span><span class="dot"></span><span>${q.i+1} / 5</span>`;
+  $("qText").textContent=q.t;
+  $("qGloss").textContent=q.gl?`(${q.gl})`:"";$("qGloss").hidden=!q.gl;
+  $("qCrit").innerHTML=`<b>체크 기준</b> ${q.a.crit}`;
+  const v=ans(q);
+  $("optY").setAttribute("aria-pressed",v===1);$("optN").setAttribute("aria-pressed",v===0);
+  const b=$("qBody");b.classList.remove("slide","backward");void b.offsetWidth;
+  if(dir){b.classList.add("slide");if(dir<0)b.classList.add("backward");}
+}
+let busy=false;
+function answer(v){
+  if(busy)return;busy=true;
+  const q=QS[cur];(mine[q.a.k]=mine[q.a.k]||[])[q.i]=v;save();
+  $("optY").setAttribute("aria-pressed",v===1);$("optN").setAttribute("aria-pressed",v===0);
+  setTimeout(()=>{busy=false;
+    if(cur<QS.length-1){cur++;renderQ(1);$("qText").focus({preventScroll:true});}
+    else{show("done");renderDone();}
+  },220);
+}
+$("optY").addEventListener("click",()=>answer(1));
+$("optN").addEventListener("click",()=>answer(0));
+$("btnBack").addEventListener("click",()=>{if(cur===0){show("start");renderStart();}else{cur--;renderQ(-1);}});
+$("btnEarly").addEventListener("click",()=>{demo=null;renderResult();show("result");focusHead();});
+document.addEventListener("keydown",e=>{
+  if(screen!=="q"||e.metaKey||e.ctrlKey||e.altKey)return;
+  const k=e.key.toLowerCase();
+  if(k==="y"||k==="1"){e.preventDefault();answer(1);}
+  else if(k==="n"||k==="2"){e.preventDefault();answer(0);}
+  else if(k==="arrowleft"||k==="backspace"){e.preventDefault();$("btnBack").click();}
+});
+
+/* ── 다 봤어요 ── */
+function renderDone(){
+  const yes=QS.filter(q=>ans(q)===1).length;
+  $("doneP").textContent=`「예」 ${yes}칸이에요. 체크한 만큼으로 결과가 나와요.`;
+  $("doneH").focus({preventScroll:true});
+}
+$("btnShow").addEventListener("click",()=>{demo=null;renderResult();show("result");focusHead();});
+$("btnFix").addEventListener("click",()=>{cur=QS.length-1;show("q");renderQ(-1);});
+
+/* ── 결과 화면 (계산은 원본 render()와 같은 순서·같은 식) ── */
 const CX=150,CY=160,R=108;
 const pt=(i,v)=>{const ang=(-90+i*72)*Math.PI/180,r=R*v/5;return[CX+r*Math.cos(ang),CY+r*Math.sin(ang)]};
-function drawRadar(res,on){
+const GC={A:"#2E7D5B",B:"#524335",C:"#C55F00",F:"#C0392B"};
+function drawRadar(res){
   let h="";
-  for(let l=1;l<=5;l++){h+=`<polygon points="${AREAS.map((_,i)=>pt(i,l).join(",")).join(" ")}" fill="none" stroke="var(${l===5?"--line":"--ring"})" stroke-width="${l===5?2:1.2}"/>`;}
-  AREAS.forEach((_,i)=>{const[x,y]=pt(i,5);h+=`<line x1="${CX}" y1="${CY}" x2="${x}" y2="${y}" stroke="var(--ring)" stroke-width="1.2"/>`;});
-  if(on){
-    const pts=res.map((r,i)=>pt(i,r.none?0:r.n));
-    h+=`<polygon points="${pts.map(p=>p.join(",")).join(" ")}" fill="var(--fill)" stroke="var(--accent)" stroke-width="3" stroke-linejoin="round"/>`;
-    pts.forEach((p,i)=>{if(!res[i].none)h+=`<circle cx="${p[0]}" cy="${p[1]}" r="5.5" fill="var(--g${res[i].g})" stroke="var(--card)" stroke-width="2"/>`;});
-  }
+  for(let l=1;l<=5;l++){h+=`<polygon points="${AREAS.map((_,i)=>pt(i,l).join(",")).join(" ")}" fill="${l===5?"#FAF8F5":"none"}" stroke="${l===5?"#DCD1C1":"#EBE3D8"}" stroke-width="${l===5?1.5:1}"/>`;}
+  AREAS.forEach((_,i)=>{const[x,y]=pt(i,5);h+=`<line x1="${CX}" y1="${CY}" x2="${x}" y2="${y}" stroke="#EBE3D8" stroke-width="1"/>`;});
+  const pts=res.map((r,i)=>pt(i,r.none?0:r.n));
+  h+=`<polygon class="shape" points="${pts.map(p=>p.join(",")).join(" ")}" fill="rgba(232,114,0,.16)" stroke="#E87200" stroke-width="3" stroke-linejoin="round"/>`;
+  pts.forEach((p,i)=>{if(!res[i].none)h+=`<circle cx="${p[0]}" cy="${p[1]}" r="6" fill="${GC[res[i].g]}" stroke="#fff" stroke-width="2"/>`;});
   AREAS.forEach((a,i)=>{const[x,y]=pt(i,6.2);const r=res[i];
     const anchor=Math.abs(x-CX)<4?"middle":x>CX?"start":"end";
-    const sub=a.k==="ai"?"제외":(!on?"":(r.none?"기록 없음":r.g));
+    const sub=a.k==="ai"?"제외":(r.none?"기록 없음":r.g);
     const dy=i===0?-14:0;
-    h+=`<text x="${x}" y="${y+dy}" text-anchor="${anchor}" font-size="21" font-weight="800" fill="var(--ink)">${a.n}</text>`;
-    if(sub)h+=`<text x="${x}" y="${y+dy+21}" text-anchor="${anchor}" font-size="17.5" font-weight="700" fill="${r.none||a.k==="ai"?"var(--muted)":`var(--g${r.g})`}">${sub}</text>`;
+    h+=`<text x="${x}" y="${y+dy}" text-anchor="${anchor}" font-size="20" font-weight="700" fill="#231815">${a.n}</text>`;
+    h+=`<text x="${x}" y="${y+dy+21}" text-anchor="${anchor}" font-size="17" font-weight="700" fill="${r.none||a.k==="ai"?"#8A785F":GC[r.g]}">${sub}</text>`;
   });
-  if(!on)h+=`<text x="${CX}" y="${CY+6}" text-anchor="middle" font-size="16" font-weight="500" fill="var(--muted)">체크하면 모양이 그려져요</text>`;
   $("radar").innerHTML=h;
 }
-
-function render(){
-  $("vCheck").hidden=shown;$("vResult").hidden=!shown;
-  const s=view(),none=s.none||[];
+function renderResult(){
+  const s=demo||mine,none=s.none||[];
   const res=AREAS.map(a=>{const arr=s[a.k]||[];const n=a.q.filter((_,i)=>arr[i]).length;return{a,arr,n,g:grade(n),none:none.includes(a.k)};});
-  res.forEach(r=>{const a=r.a;
-    a.q.forEach((_,i)=>{const el=$(a.k+"-"+i);el.checked=!!r.arr[i];el.disabled=!!demo;});
-    $("c-"+a.k).textContent=r.none?"예시 기록 없음":`「예」 ${r.n} / 5`;
-    $("nn-"+a.k).hidden=!r.none;
-  });
-  $("demoCheck").classList.toggle("on",!!demo);
-  $("btnDemo").hidden=!!demo;$("btnReset").disabled=!!demo;
-  $("undoBox").hidden=!undo||!!demo;$("saveNote").hidden=!!undo||!!demo;
-  $("btnShow").textContent=demo?"예시 결과 보기":"진단 결과 보기";
-  if(!shown)return;
-  /* 도장 = AI 뺀 네 영역 중 가장 낮은 등급 */
   const four=res.filter(r=>r.a.k!=="ai"&&!r.none);
   const G=four.length?four.map(r=>r.g).sort((x,y)=>ORDER.indexOf(x)-ORDER.indexOf(y))[0]:"F";
   const P=pickPattern(res);
   const lowR=res.slice(0,4).filter(r=>!r.none&&(r.g==="C"||r.g==="F"));
   const bR=res.slice(0,4).filter(r=>!r.none&&r.n<5);
   const x={ai:res[4],bNames:bR.map(r=>r.a.n).join("·"),bKey:bR.length?bR[0].a.k:"ai",bGap:bR.length?firstGap(bR[0].arr):0,aiGap:firstGap(res[4].arr)??0,aiUse:[0,2,3,4].some(i=>res[4].arr[i]),lowG:lowR.length&&lowR.every(r=>r.g==="F")?"F":"C",
-    /* C 영역 장면 = 처음 빈 칸 번호(표준은 매뉴얼 칸 체크면 M) */
+    anyOps:res.slice(0,4).some(r=>r.arr[2]||r.arr[3]),
     has:(k,...ii)=>{const a=res.find(r=>r.a.k===k).arr;return ii.some(i=>!!a[i]);},
     cv:lowR.length?(lowR[0].a.k==="std"&&lowR[0].arr[2]?"M":firstGap(lowR[0].arr)):0};
   const v=f=>{if(typeof f==="function")return f(x);if(f&&typeof f==="object"){const g=f[x.lowG];return g&&typeof g==="object"?g[x.cv]:g;}return f;};
-  $("demoBar").classList.toggle("on",!!demo);
-  $("rows").innerHTML=res.map(r=>`<div class="rw"><span class="g ${r.none?"gN":"g"+r.g}">${r.none?"–":r.g}</span><span><b>${r.a.n}</b><span class="cnt">${r.none?"기록 없음":`「예」 ${r.n} / 5`}${r.a.k==="ai"?" · 계산 제외":""}</span></span><p>${rowText(r)}</p></div>`).join("");
-  drawRadar(res,true);
-  const st=$("cStamp");st.textContent=G;st.className="stamp g"+G;
-  $("cTitle").textContent=P.t;
+  $("demoBar").hidden=!demo;
+  let gunde=true;const firstMix=r=>{const mix=!r.none&&r.n>0&&r.n<5;const f=mix&&gunde;if(mix)gunde=false;return f;};
+  $("rows").innerHTML=res.map(r=>`<div class="rw"><span class="gd ${r.none?"bgN":"bg"+r.g}">${r.none?"–":r.g}</span><span class="nm">${r.a.n}<span>${r.none?"기록 없음":`「예」 ${r.n} / 5`}${r.a.k==="ai"?" · 계산 제외":""}</span></span><p>${typeof rowText==="function"&&rowText.length>1?rowText(r,firstMix(r)):rowText(r)}</p></div>`).join("");
+  drawRadar(res);
+  $("cStamp").textContent=G;
+  $("cTitle").textContent=v(P.t);
+  $("cGrade").innerHTML=`<b>${G}등급 · ${GRADES[G].n}</b> ${GRADES[G].s}`;
   $("cScene").textContent=v(P.s);
   $("cWhy").textContent=v(P.w)+(P.low&&!res[4].none&&res[4].n>=3?AIPLUS:"");
   $("cLab").textContent=P.lab||"지금 먼저 잡을 것";
-  $("cSys").textContent=SYS[v(P.k)];$("cMsg").textContent=v(P.f);
+  $("cSys").textContent=SYS[v(P.k)];$("cMsg").textContent=v(P.f)+(P.q?" "+v(P.q):"");
   $("hCta").textContent=P.h||(P.wide?"더 넓혀 보고 싶다면":"혼자 채우기 어렵다면");
   $("ctaFit").textContent=v(P.c);
-  $("ctaLine").textContent=P.wide?"1:1 무료 상담에서 이 결과를 같이 보고 다음에 맡길 일을 골라요.":"1:1 무료 상담에서 이 결과를 같이 보고 순서를 정해요.";
-  renderGrades(G);
+  $("ctaLine").textContent=P.wide?"1:1 무료 상담에서 이 결과를 같이 보고 다음에 맡길 일을 골라요.":"1:1 무료 상담에서 이 결과를 함께 보고, 우리 회사에 맞게 무엇부터 채울지 정해요.";
+  $("gradeTable").innerHTML=["A","B","C","F"].map(k=>`<div class="gr${k===G?" cur":""}"><span class="gd bg${k}">${k}</span><span class="n">${GRADES[k].n}${k===G?`<span class="now">지금 우리 회사</span>`:""}</span><p>${GRADES[k].s}</p></div>`).join("");
+  document.querySelectorAll(".reveal").forEach(el=>el.classList.remove("in"));
+  requestAnimationFrame(()=>observeReveal());
 }
-function renderGrades(cur){
-  $("gradeTable").innerHTML=["A","B","C","F"].map(k=>`<div class="gr${k===cur?" cur":""}"><span class="g g${k}">${k}</span><div><span class="n">${GRADES[k].n}${k===cur?" · 지금 우리 회사":""}</span><p>${GRADES[k].s}</p></div></div>`).join("");
+function focusHead(){$("rHead").focus({preventScroll:true});}
+let io;
+function observeReveal(){
+  if(!("IntersectionObserver" in window)){document.querySelectorAll(".reveal").forEach(e=>e.classList.add("in"));return;}
+  io&&io.disconnect();
+  io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);}}),{rootMargin:"0px 0px -8% 0px"});
+  document.querySelectorAll(".reveal").forEach(e=>io.observe(e));
 }
-render();
+/* 모바일 하단 고정 바: 등급 카드를 지나면 나타나고, 상담 구간이 보이면 숨어요 */
+function dockSync(){
+  if(screen!=="result")return;
+  const h=$("rHead").getBoundingClientRect(),c=$("ctaSec").getBoundingClientRect();
+  $("dock").classList.toggle("show",h.bottom<0&&c.top>innerHeight);
+}
+addEventListener("scroll",dockSync,{passive:true});addEventListener("resize",dockSync);
+const again=()=>{demo=null;show("start");renderStart();};
+$("btnMine").addEventListener("click",again);
+/* 체크 다시 하기 = 1번 문항부터, 이전 답은 눌린 채로 남아 있어요 */
+const redo=()=>{demo=null;cur=0;show("q");renderQ(1);};
+$("btnAgain").addEventListener("click",redo);
+$("dockAgain").addEventListener("click",redo);
+
+miniPenta();renderStart();
 </script>
 </body>
 </html>
